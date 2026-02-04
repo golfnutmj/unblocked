@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ's Project Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>🦊 MJ's Project Board</h1>
+        <div class="controls">
+            <button id="darkModeToggle" class="btn-icon" title="Toggle Dark Mode">🌙</button>
+            <button id="exportBtn" class="btn-secondary" title="Export Data">Export</button>
+            <button id="importBtn" class="btn-secondary" title="Import Data">Import</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+    <div class="board" id="board">
+        <div class="column" data-column="ideas">
+            <div class="column-header">
+                <h2>💡 Ideas</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="ideas-cards"></div>
+            <button class="add-card-btn" data-column="ideas">+ Add Card</button>
+        </div>
+
+        <div class="column" data-column="progress">
+            <div class="column-header">
+                <h2>🚧 In Progress</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="progress-cards"></div>
+            <button class="add-card-btn" data-column="progress">+ Add Card</button>
+        </div>
+
+        <div class="column" data-column="done">
+            <div class="column-header">
+                <h2>✅ Done</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="done-cards"></div>
+            <button class="add-card-btn" data-column="done">+ Add Card</button>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">New Card</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="cardTitle" placeholder="Card title..." maxlength="100">
+                <textarea id="cardDescription" placeholder="Add description..." rows="5"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="deleteCard" class="btn-danger" style="display: none;">Delete</button>
+                <div class="modal-actions">
+                    <button id="cancelCard" class="btn-secondary">Cancel</button>
+                    <button id="saveCard" class="btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
