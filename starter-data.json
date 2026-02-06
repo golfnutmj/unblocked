@@ -1,0 +1,110 @@
+{
+  "ideas": [
+    {
+      "id": "1738638000001",
+      "title": "Relocation Helper App - Full Platform",
+      "description": "Multi-platform app (iOS, Android, web) to help Americans relocate abroad. Visa assistance, moving companies, pet relocation, community insights. Start with France/Netherlands focus.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000002",
+      "title": "Photography YouTube Channel",
+      "description": "Leverage Leica M11-P, Nikon Z8, and Nikon ZR. Share photography journey, techniques, gear reviews. Could tie into Europe relocation content.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000003",
+      "title": "Automated Earnings Digest (Paid Version)",
+      "description": "Build Streamlit app: enter ticker → auto-fetch transcript → AI summary in 30 seconds. Cost: $5-10/month. Only build if manual version proves valuable.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000004",
+      "title": "Earnings Digest - Micro-SaaS",
+      "description": "If personal tool works well, productize it. Charge $5-10/month (undercut Seeking Alpha's $20/month). Target: individual investors, finance students.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000005",
+      "title": "Europe Relocation Blog/Content Series",
+      "description": "Document your own relocation journey to France/Netherlands. Visa process, housing, logistics. Content marketing for future Relocation Helper app.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000006",
+      "title": "Food & Photography Fusion Project",
+      "description": "Combine love of food with photography skills. Food blog? Instagram? Restaurant reviews in Europe? Revenue via affiliate/sponsorships.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    }
+  ],
+  "progress": [
+    {
+      "id": "1738638000010",
+      "title": "Earnings Digest - Free Manual Workflow",
+      "description": "Testing concept: Manually fetch earnings transcripts from SEC Edgar, summarize with Claude Pro. Goal: 5-10 test runs this week. Compare to Seeking Alpha quality.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000011",
+      "title": "Relocation Helper - Landing Page",
+      "description": "Build simple landing page to validate concept. Email capture, value proposition. Use Framer or Next.js. Target launch: Week 2-3.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000012",
+      "title": "Business Ideas Analysis & Prioritization",
+      "description": "Evaluate investment app, relocation helper, and website needs. Assess feasibility, costs, ROI. Create strategic roadmap.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    },
+    {
+      "id": "1738638000013",
+      "title": "Learn OpenClaw & Vibe Coding Workflow",
+      "description": "Master OpenClaw tools, skills, agents. Understand how to build without coding. Practice with real projects.",
+      "createdAt": "2026-02-03T19:00:00.000Z"
+    }
+  ],
+  "done": [
+    {
+      "id": "1738638000020",
+      "title": "OpenClaw Setup & Configuration",
+      "description": "Installed OpenClaw, set up workspace, configured initial settings. Gateway running successfully.",
+      "createdAt": "2026-02-03T18:17:00.000Z"
+    },
+    {
+      "id": "1738638000021",
+      "title": "Met Milo - First Employee! 🦊",
+      "description": "Established identity, roles, working relationship. Created IDENTITY.md, USER.md, SOUL.md. Defined collaboration style and boundaries.",
+      "createdAt": "2026-02-03T18:41:00.000Z"
+    },
+    {
+      "id": "1738638000022",
+      "title": "Daily Morning Brief - Automated",
+      "description": "Set up cron job for 8 AM PST daily. Includes: creative business idea, suggested tasks, weather, inspiration. First brief tomorrow!",
+      "createdAt": "2026-02-03T19:01:00.000Z"
+    },
+    {
+      "id": "1738638000023",
+      "title": "Visual Kanban Dashboard",
+      "description": "Built custom kanban board with drag-and-drop, dark mode, local storage, export/import. Pure HTML/CSS/JS. Content-ready!",
+      "createdAt": "2026-02-03T20:24:00.000Z"
+    },
+    {
+      "id": "1738638000024",
+      "title": "Earnings Digest Workflow Guide",
+      "description": "Created EARNINGS-DIGEST-FREE.md with step-by-step manual workflow. Includes SEC Edgar sources, Claude prompts, text replacement setup.",
+      "createdAt": "2026-02-03T19:34:00.000Z"
+    },
+    {
+      "id": "1738638000025",
+      "title": "Business Ideas Documentation",
+      "description": "Analyzed investment app (on hold - too expensive), relocation helper (high priority), earnings tool (building now). Created IDEAS.md and PROJECT-EARNINGS-DIGEST.md.",
+      "createdAt": "2026-02-03T19:17:00.000Z"
+    },
+    {
+      "id": "1738638000026",
+      "title": "Memory System Initialized",
+      "description": "Set up MEMORY.md for long-term context and memory/YYYY-MM-DD.md for daily logs. Capturing decisions, projects, learnings.",
+      "createdAt": "2026-02-03T18:50:00.000Z"
+    }
+  ]
+}

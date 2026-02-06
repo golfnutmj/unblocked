@@ -2,19 +2,12 @@
 let boards = {
     ideas: [],
     progress: [],
-    done: [],
-    archived: [] // New: archived cards
-};
-
-let boardConfig = {
-    name: "🦊 MJ's Project Board" // Default board name
+    done: []
 };
 
 let currentCard = null;
 let editingCard = null;
 let activeFilter = ''; // For project filtering
-let searchQuery = ''; // For text search
-let selectedLabels = []; // Temporary labels during edit
 let isFirebaseReady = false;
 
 // Wait for Firebase to be ready
@@ -44,16 +37,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load data from Firestore
     await loadFromFirestore();
-    await loadBoardConfig();
     
     renderAllColumns();
     setupEventListeners();
     updateAllCounts();
-    updateBoardTitle();
     
     // Setup real-time sync
     setupFirestoreSync();
-    setupBoardConfigSync();
 });
 
 // Firestore Functions
@@ -64,10 +54,11 @@ async function loadFromFirestore() {
         const db = window.firebaseDB;
         const boardsRef = window.firebaseCollection(db, 'kanban-boards');
         
-        // Listen for changes in each column including archived
-        for (const column of ['ideas', 'progress', 'done', 'archived']) {
+        // Listen for changes in each column
+        for (const column of ['ideas', 'progress', 'done']) {
             const colRef = window.firebaseDoc(boardsRef, column);
             
+            // Try to get initial data
             const snapshot = await new Promise((resolve) => {
                 window.firebaseOnSnapshot(colRef, resolve, { includeMetadataChanges: false });
             });
@@ -90,7 +81,7 @@ function setupFirestoreSync() {
     const boardsRef = window.firebaseCollection(db, 'kanban-boards');
     
     // Real-time listeners for each column
-    for (const column of ['ideas', 'progress', 'done', 'archived']) {
+    for (const column of ['ideas', 'progress', 'done']) {
         const colRef = window.firebaseDoc(boardsRef, column);
         
         window.firebaseOnSnapshot(colRef, (snapshot) => {
@@ -98,12 +89,11 @@ function setupFirestoreSync() {
                 const data = snapshot.data();
                 const newCards = data.cards || [];
                 
+                // Only update if data changed (avoid infinite loops)
                 if (JSON.stringify(boards[column]) !== JSON.stringify(newCards)) {
                     boards[column] = newCards;
-                    if (column !== 'archived') {
-                        renderColumn(column);
-                        updateCount(column);
-                    }
+                    renderColumn(column);
+                    updateCount(column);
                 }
             }
         });
@@ -121,8 +111,8 @@ async function saveToFirestore() {
         const db = window.firebaseDB;
         const boardsRef = window.firebaseCollection(db, 'kanban-boards');
         
-        // Save each column to Firestore including archived
-        for (const column of ['ideas', 'progress', 'done', 'archived']) {
+        // Save each column to Firestore
+        for (const column of ['ideas', 'progress', 'done']) {
             const colRef = window.firebaseDoc(boardsRef, column);
             await window.firebaseSetDoc(colRef, {
                 cards: boards[column],
@@ -130,78 +120,11 @@ async function saveToFirestore() {
             });
         }
         
+        // Also save to localStorage as backup
         saveToLocalStorage();
     } catch (err) {
         console.error('Firestore save failed:', err);
         saveToLocalStorage();
-    }
-}
-
-// Board Config Functions
-async function loadBoardConfig() {
-    if (!isFirebaseReady) return;
-    
-    try {
-        const db = window.firebaseDB;
-        const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
-        
-        const snapshot = await new Promise((resolve) => {
-            window.firebaseOnSnapshot(configRef, resolve, { includeMetadataChanges: false });
-        });
-        
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            boardConfig.name = data.name || "🦊 MJ's Project Board";
-        }
-    } catch (err) {
-        console.warn('Failed to load board config:', err);
-    }
-}
-
-async function saveBoardConfig() {
-    if (!isFirebaseReady) return;
-    
-    try {
-        const db = window.firebaseDB;
-        const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
-        
-        await window.firebaseSetDoc(configRef, {
-            name: boardConfig.name,
-            updatedAt: new Date().toISOString()
-        });
-    } catch (err) {
-        console.error('Failed to save board config:', err);
-    }
-}
-
-function setupBoardConfigSync() {
-    if (!isFirebaseReady) return;
-    
-    const db = window.firebaseDB;
-    const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
-    
-    window.firebaseOnSnapshot(configRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            if (data.name && data.name !== boardConfig.name) {
-                boardConfig.name = data.name;
-                updateBoardTitle();
-            }
-        }
-    });
-}
-
-function updateBoardTitle() {
-    document.getElementById('boardTitle').textContent = boardConfig.name;
-    document.title = boardConfig.name;
-}
-
-function editBoardTitle() {
-    const newName = prompt('Enter new board name:', boardConfig.name);
-    if (newName && newName.trim()) {
-        boardConfig.name = newName.trim();
-        updateBoardTitle();
-        saveBoardConfig();
     }
 }
 
@@ -214,8 +137,7 @@ function loadFromLocalStorage() {
     const stored = localStorage.getItem('kanbanData');
     if (stored) {
         try {
-            const loaded = JSON.parse(stored);
-            boards = { ...boards, ...loaded };
+            boards = JSON.parse(stored);
         } catch (err) {
             console.error('Failed to load from localStorage:', err);
         }
@@ -237,55 +159,20 @@ function setupEventListeners() {
     document.getElementById('cancelCard').addEventListener('click', closeModal);
     document.getElementById('saveCard').addEventListener('click', saveCard);
     document.getElementById('deleteCard').addEventListener('click', deleteCard);
-    document.getElementById('archiveCard').addEventListener('click', archiveCard);
-
-    // Archive modal
-    document.getElementById('showArchiveBtn').addEventListener('click', showArchiveModal);
-    document.getElementById('closeArchive').addEventListener('click', closeArchiveModal);
-    document.getElementById('closeArchiveBtn').addEventListener('click', closeArchiveModal);
 
     // Click outside modal to close
     document.getElementById('cardModal').addEventListener('click', (e) => {
         if (e.target.id === 'cardModal') closeModal();
     });
-    
-    document.getElementById('archiveModal').addEventListener('click', (e) => {
-        if (e.target.id === 'archiveModal') closeArchiveModal();
-    });
-
-    // Search
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        searchQuery = e.target.value.toLowerCase();
-        renderAllColumns();
-        updateAllCounts();
-    });
 
     // Dark mode toggle
     document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
-
-    // Board title edit
-    document.getElementById('editBoardTitleBtn').addEventListener('click', editBoardTitle);
 
     // Project filter
     document.getElementById('projectFilter').addEventListener('change', (e) => {
         activeFilter = e.target.value;
         renderAllColumns();
         updateAllCounts();
-    });
-
-    // Label buttons in modal
-    document.querySelectorAll('.label-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const label = e.target.dataset.label;
-            if (selectedLabels.includes(label)) {
-                selectedLabels = selectedLabels.filter(l => l !== label);
-                e.target.classList.remove('active');
-            } else {
-                selectedLabels.push(label);
-                e.target.classList.add('active');
-            }
-        });
     });
 
     // Export/Import
@@ -297,10 +184,7 @@ function setupEventListeners() {
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeModal();
-            closeArchiveModal();
-        }
+        if (e.key === 'Escape') closeModal();
     });
 }
 
@@ -313,22 +197,10 @@ function openModal(column, card = null) {
     const cardProject = document.getElementById('cardProject');
     const cardPriority = document.getElementById('cardPriority');
     const cardEffort = document.getElementById('cardEffort');
-    const cardDueDate = document.getElementById('cardDueDate');
     const deleteBtn = document.getElementById('deleteCard');
-    const archiveBtn = document.getElementById('archiveCard');
 
     currentCard = column;
     editingCard = card;
-    selectedLabels = card ? (card.labels || []) : [];
-
-    // Update label buttons
-    document.querySelectorAll('.label-btn').forEach(btn => {
-        if (selectedLabels.includes(btn.dataset.label)) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
 
     if (card) {
         title.textContent = 'Edit Card';
@@ -337,9 +209,7 @@ function openModal(column, card = null) {
         cardProject.value = card.project || '';
         cardPriority.value = card.priority || '';
         cardEffort.value = card.effort || '';
-        cardDueDate.value = card.dueDate || '';
         deleteBtn.style.display = 'block';
-        archiveBtn.style.display = 'block';
     } else {
         title.textContent = 'New Card';
         cardTitle.value = '';
@@ -347,9 +217,7 @@ function openModal(column, card = null) {
         cardProject.value = '';
         cardPriority.value = '';
         cardEffort.value = '';
-        cardDueDate.value = '';
         deleteBtn.style.display = 'none';
-        archiveBtn.style.display = 'none';
     }
 
     modal.classList.add('active');
@@ -361,7 +229,6 @@ function closeModal() {
     modal.classList.remove('active');
     currentCard = null;
     editingCard = null;
-    selectedLabels = [];
 }
 
 function saveCard() {
@@ -370,7 +237,6 @@ function saveCard() {
     const project = document.getElementById('cardProject').value;
     const priority = document.getElementById('cardPriority').value;
     const effort = document.getElementById('cardEffort').value;
-    const dueDate = document.getElementById('cardDueDate').value;
 
     if (!title) {
         alert('Please enter a card title');
@@ -384,8 +250,6 @@ function saveCard() {
         editingCard.project = project;
         editingCard.priority = priority;
         editingCard.effort = effort;
-        editingCard.dueDate = dueDate;
-        editingCard.labels = [...selectedLabels];
     } else {
         // Create new card
         const newCard = {
@@ -395,8 +259,6 @@ function saveCard() {
             project,
             priority,
             effort,
-            dueDate,
-            labels: [...selectedLabels],
             createdAt: new Date().toISOString(),
             movedToColumnAt: new Date().toISOString()
         };
@@ -410,7 +272,7 @@ function saveCard() {
 }
 
 function deleteCard() {
-    if (!confirm('Delete this card permanently?')) return;
+    if (!confirm('Delete this card?')) return;
 
     const column = Object.keys(boards).find(col => 
         boards[col].some(card => card === editingCard)
@@ -425,132 +287,26 @@ function deleteCard() {
     }
 }
 
-function archiveCard() {
-    if (!confirm('Archive this card?')) return;
-
-    const column = Object.keys(boards).find(col => 
-        boards[col].some(card => card === editingCard)
-    );
-
-    if (column && column !== 'archived') {
-        // Remove from current column
-        boards[column] = boards[column].filter(card => card !== editingCard);
-        
-        // Add to archived
-        editingCard.archivedAt = new Date().toISOString();
-        boards.archived.push(editingCard);
-        
-        saveToFirestore();
-        renderColumn(column);
-        updateCount(column);
-        closeModal();
-    }
-}
-
-// Archive Modal
-function showArchiveModal() {
-    const modal = document.getElementById('archiveModal');
-    const listEl = document.getElementById('archiveList');
-    
-    listEl.innerHTML = '';
-    
-    if (boards.archived.length === 0) {
-        listEl.innerHTML = '<p class="empty-state">No archived cards</p>';
-    } else {
-        boards.archived.forEach(card => {
-            const cardEl = createArchiveCardElement(card);
-            listEl.appendChild(cardEl);
-        });
-    }
-    
-    modal.classList.add('active');
-}
-
-function closeArchiveModal() {
-    const modal = document.getElementById('archiveModal');
-    modal.classList.remove('active');
-}
-
-function createArchiveCardElement(card) {
-    const div = document.createElement('div');
-    div.className = 'archive-card';
-    
-    const title = document.createElement('div');
-    title.className = 'archive-card-title';
-    title.textContent = card.title;
-    div.appendChild(title);
-    
-    const actions = document.createElement('div');
-    actions.className = 'archive-card-actions';
-    
-    const restoreBtn = document.createElement('button');
-    restoreBtn.textContent = '↩️ Restore';
-    restoreBtn.className = 'btn-secondary btn-small';
-    restoreBtn.onclick = () => restoreCard(card);
-    
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '🗑️ Delete';
-    deleteBtn.className = 'btn-danger btn-small';
-    deleteBtn.onclick = () => deleteArchivedCard(card);
-    
-    actions.appendChild(restoreBtn);
-    actions.appendChild(deleteBtn);
-    div.appendChild(actions);
-    
-    return div;
-}
-
-function restoreCard(card) {
-    if (!confirm('Restore this card to Ideas?')) return;
-    
-    boards.archived = boards.archived.filter(c => c !== card);
-    delete card.archivedAt;
-    card.movedToColumnAt = new Date().toISOString();
-    boards.ideas.push(card);
-    
-    saveToFirestore();
-    renderColumn('ideas');
-    updateCount('ideas');
-    showArchiveModal(); // Refresh archive view
-}
-
-function deleteArchivedCard(card) {
-    if (!confirm('Permanently delete this card?')) return;
-    
-    boards.archived = boards.archived.filter(c => c !== card);
-    saveToFirestore();
-    showArchiveModal(); // Refresh archive view
-}
-
 // Render functions
 function renderAllColumns() {
-    Object.keys(boards).filter(k => k !== 'archived').forEach(column => renderColumn(column));
+    Object.keys(boards).forEach(column => renderColumn(column));
 }
 
 function renderColumn(column) {
     const container = document.getElementById(`${column}-cards`);
     container.innerHTML = '';
 
-    let filteredCards = boards[column];
-    
     // Apply project filter
-    if (activeFilter) {
-        filteredCards = filteredCards.filter(card => card.project === activeFilter);
-    }
-    
-    // Apply search
-    if (searchQuery) {
-        filteredCards = filteredCards.filter(card => 
-            card.title.toLowerCase().includes(searchQuery) ||
-            (card.description && card.description.toLowerCase().includes(searchQuery))
-        );
-    }
+    const filteredCards = activeFilter 
+        ? boards[column].filter(card => card.project === activeFilter)
+        : boards[column];
 
     filteredCards.forEach(card => {
         const cardEl = createCardElement(card, column);
         container.appendChild(cardEl);
     });
 
+    // Setup drag and drop
     setupDragAndDrop(container, column);
 }
 
@@ -563,6 +319,7 @@ function createCardElement(card, column) {
     const title = document.createElement('div');
     title.className = 'card-title';
     title.textContent = card.title;
+
     div.appendChild(title);
 
     if (card.description) {
@@ -572,52 +329,9 @@ function createCardElement(card, column) {
         div.appendChild(desc);
     }
 
-    // Card badges
+    // Card badges (project, priority, effort, time)
     const badges = document.createElement('div');
     badges.className = 'card-badges';
-    
-    // Labels
-    if (card.labels && card.labels.length > 0) {
-        card.labels.forEach(label => {
-            const labelBadge = document.createElement('span');
-            labelBadge.className = `badge badge-label label-${label}`;
-            const labelIcons = {
-                urgent: '🔥',
-                research: '📚',
-                blocked: '🚧',
-                review: '👀',
-                bug: '🐛'
-            };
-            labelBadge.textContent = labelIcons[label] || label;
-            badges.appendChild(labelBadge);
-        });
-    }
-    
-    // Due date
-    if (card.dueDate) {
-        const dueBadge = document.createElement('span');
-        dueBadge.className = 'badge badge-due';
-        const dueDate = new Date(card.dueDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        dueDate.setHours(0, 0, 0, 0);
-        
-        const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-        
-        if (diffDays < 0) {
-            dueBadge.classList.add('overdue');
-            dueBadge.textContent = `⚠️ Overdue`;
-        } else if (diffDays === 0) {
-            dueBadge.classList.add('due-today');
-            dueBadge.textContent = `📅 Today`;
-        } else if (diffDays <= 3) {
-            dueBadge.classList.add('due-soon');
-            dueBadge.textContent = `📅 ${diffDays}d`;
-        } else {
-            dueBadge.textContent = `📅 ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-        }
-        badges.appendChild(dueBadge);
-    }
     
     // Project badge
     if (card.project) {
@@ -627,7 +341,7 @@ function createCardElement(card, column) {
             'earnings-digest': '📊 Earnings',
             'relocation-helper': '🌍 Relocation',
             'photo-journey': '📸 Photo',
-            'unblocked': '🚀 Unblocked',
+            'kanban': '🦊 Kanban',
             'other': '💡 Other'
         };
         projectBadge.textContent = projectLabels[card.project] || card.project;
@@ -683,6 +397,7 @@ function createCardElement(card, column) {
     return div;
 }
 
+// Helper function to calculate days in column
 function calculateDaysInColumn(movedAt) {
     const moved = new Date(movedAt);
     const now = new Date();
@@ -723,7 +438,10 @@ function moveCard(cardId, fromColumn, toColumn) {
     if (cardIndex === -1) return;
 
     const [card] = boards[fromColumn].splice(cardIndex, 1);
+    
+    // Update time tracking when moving to new column
     card.movedToColumnAt = new Date().toISOString();
+    
     boards[toColumn].push(card);
 
     saveToFirestore();
@@ -736,26 +454,18 @@ function moveCard(cardId, fromColumn, toColumn) {
 // Counter updates
 function updateCount(column) {
     const columnEl = document.querySelector(`[data-column="${column}"]`);
-    if (!columnEl) return;
-    
     const countEl = columnEl.querySelector('.card-count');
     
-    let cards = boards[column];
-    if (activeFilter) {
-        cards = cards.filter(card => card.project === activeFilter);
-    }
-    if (searchQuery) {
-        cards = cards.filter(card => 
-            card.title.toLowerCase().includes(searchQuery) ||
-            (card.description && card.description.toLowerCase().includes(searchQuery))
-        );
-    }
+    // Show filtered count if filter is active
+    const count = activeFilter
+        ? boards[column].filter(card => card.project === activeFilter).length
+        : boards[column].length;
     
-    countEl.textContent = cards.length;
+    countEl.textContent = count;
 }
 
 function updateAllCounts() {
-    Object.keys(boards).filter(k => k !== 'archived').forEach(updateCount);
+    Object.keys(boards).forEach(updateCount);
 }
 
 // Dark mode
@@ -802,5 +512,6 @@ function importData(e) {
     };
     reader.readAsText(file);
     
+    // Reset file input
     e.target.value = '';
 }

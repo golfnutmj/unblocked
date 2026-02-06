@@ -50,6 +50,12 @@ body {
     z-index: 100;
 }
 
+.board-title-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
 .header h1 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -57,6 +63,24 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin: 0;
+}
+
+.btn-icon-small {
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.4rem 0.6rem;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.btn-icon-small:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    background: var(--border-color);
 }
 
 .controls {
@@ -368,4 +392,399 @@ body {
     background: rgba(102, 126, 234, 0.1);
     border: 2px dashed var(--accent);
     border-radius: 8px;
+}
+
+/* Card Metadata in Modal */
+.card-metadata {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.metadata-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metadata-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metadata-group select {
+    padding: 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.metadata-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Card Badges */
+.card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.badge-priority {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--accent);
+}
+
+.badge-priority.priority-high {
+    background: rgba(245, 101, 101, 0.1);
+    color: #f56565;
+}
+
+.badge-priority.priority-medium {
+    background: rgba(237, 137, 54, 0.1);
+    color: #ed8936;
+}
+
+.badge-priority.priority-low {
+    background: rgba(72, 187, 120, 0.1);
+    color: #48bb78;
+}
+
+.badge-effort {
+    background: rgba(159, 122, 234, 0.1);
+    color: #9f7aea;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+}
+
+.badge-time {
+    background: rgba(102, 126, 234, 0.08);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+/* Mobile responsiveness for metadata */
+@media (max-width: 768px) {
+    .card-metadata {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Header Filter Group */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+    border-color: var(--accent);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Project Badge */
+.badge-project {
+    background: rgba(72, 187, 120, 0.1);
+    color: #48bb78;
+    font-weight: 600;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .header-right {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-select {
+        flex: 1;
+    }
+    
+    .controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Search Bar */
+.search-group {
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Label Selector in Modal */
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.label-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.label-btn {
+    padding: 0.4rem 0.8rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.label-btn:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.label-btn.active {
+    border-color: var(--accent);
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Date Input */
+.date-input {
+    padding: 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Label Badges on Cards */
+.badge-label {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.label-urgent {
+    background: rgba(245, 101, 101, 0.1);
+    color: #f56565;
+}
+
+.label-research {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.label-blocked {
+    background: rgba(237, 137, 54, 0.1);
+    color: #ed8936;
+}
+
+.label-review {
+    background: rgba(159, 122, 234, 0.1);
+    color: #9f7aea;
+}
+
+.label-bug {
+    background: rgba(245, 101, 101, 0.1);
+    color: #f56565;
+}
+
+/* Due Date Badges */
+.badge-due {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    font-size: 0.7rem;
+}
+
+.badge-due.overdue {
+    background: rgba(245, 101, 101, 0.15);
+    color: #f56565;
+    font-weight: 700;
+}
+
+.badge-due.due-today {
+    background: rgba(237, 137, 54, 0.15);
+    color: #ed8936;
+    font-weight: 700;
+}
+
+.badge-due.due-soon {
+    background: rgba(237, 137, 54, 0.1);
+    color: #ed8936;
+}
+
+/* Modal Footer Layout */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-left-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Archive Modal */
+.archive-modal-content {
+    max-width: 600px;
+}
+
+.archive-list {
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.archive-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.archive-card-title {
+    font-weight: 600;
+    flex: 1;
+}
+
+.archive-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-group {
+        max-width: 100%;
+        order: -1;
+        width: 100%;
+    }
+    
+    .header-right {
+        flex-direction: column;
+    }
+    
+    .label-selector {
+        justify-content: flex-start;
+    }
+    
+    .archive-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .archive-card-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }
