@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unblocked - Beautiful Kanban Boards</title>
+    <title>Unblocked - Your Visual Project Board</title>
     
     <!-- iOS Web App Config -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,262 +14,332 @@
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
     
-    <link rel="stylesheet" href="landing-style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            color: white;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero .tagline {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 1rem;
+        }
+
+        .beta-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #14b8a6;
+        }
+
+        .card p {
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .feature p {
+            font-size: 0.9rem;
+            color: #718096;
+            margin: 0;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #14b8a6;
+            color: white;
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #14b8a6;
+            border: 2px solid #14b8a6;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+
+        .faq-item {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 12px;
+            border-left: 4px solid #14b8a6;
+        }
+
+        .faq-item h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .faq-item p {
+            color: #718096;
+            margin: 0;
+        }
+
+        .disclaimer {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .disclaimer h3 {
+            color: #c53030;
+            margin-bottom: 0.5rem;
+        }
+
+        .disclaimer p {
+            color: #742a2a;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 2rem 0;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero .tagline {
+                font-size: 1.1rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="logo">
-                <img src="icon.png" alt="Unblocked" class="logo-img">
-                <span class="logo-text">Unblocked</span>
-                <span class="beta-badge">BETA</span>
-            </div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#faq">FAQ</a>
-                <a href="board.html?demo=true" class="btn-demo">Try Demo</a>
-                <a href="board.html" class="btn-primary">Start New Board</a>
-            </div>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">🚀</div>
+            <h1>Unblocked</h1>
+            <p class="tagline">Visual project management that just works</p>
+            <span class="beta-badge">⚡ BETA</span>
         </div>
-    </nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Get <span class="gradient-text">Unblocked</span></h1>
-            <p class="hero-subtitle">Beautiful, real-time kanban boards that sync across all your devices</p>
-            <div class="hero-buttons">
-                <a href="board.html" class="btn-hero-primary">Start Your Board</a>
-                <a href="board.html?demo=true" class="btn-hero-secondary">View Demo</a>
-            </div>
-            <p class="beta-notice">⚠️ Currently in Beta Testing - Free while we improve!</p>
+        <div class="card">
+            <h2>Welcome to Unblocked!</h2>
+            <p>
+                Unblocked is a beautiful, real-time kanban board that helps you organize your projects, 
+                track progress, and get things done. Whether you're managing personal tasks or collaborating 
+                with a team, Unblocked keeps everything visual and simple.
+            </p>
+            <p>
+                <strong>Currently in Beta:</strong> We're actively improving Unblocked based on user feedback. 
+                Your experience helps us build a better product!
+            </p>
         </div>
-        <div class="hero-visual">
-            <div class="floating-card card-1">
-                <div class="card-header">💡 Ideas</div>
-                <div class="card-body">Build something amazing</div>
-            </div>
-            <div class="floating-card card-2">
-                <div class="card-header">🚧 In Progress</div>
-                <div class="card-body">Making it happen</div>
-            </div>
-            <div class="floating-card card-3">
-                <div class="card-header">✅ Done</div>
-                <div class="card-body">Shipped!</div>
-            </div>
-        </div>
-    </section>
 
-    <section id="features" class="features">
-        <div class="container">
-            <h2 class="section-title">Why Unblocked?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Real-Time Sync</h3>
-                    <p>Changes appear instantly across all devices. Work from anywhere.</p>
+        <div class="card">
+            <h2>✨ Key Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>🎯 Drag & Drop</h3>
+                    <p>Intuitive card movement across columns - move tasks as your work progresses</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Cross-Platform</h3>
-                    <p>Works on iPhone, iPad, Mac, PC - any device with a browser.</p>
+                <div class="feature">
+                    <h3>🔄 Real-Time Sync</h3>
+                    <p>Changes sync instantly across all your devices using Firebase</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>Beautiful Design</h3>
-                    <p>Clean, modern interface that makes work feel effortless.</p>
+                <div class="feature">
+                    <h3>📱 Works Everywhere</h3>
+                    <p>Desktop, tablet, phone - access your boards from any device</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Lightning Fast</h3>
-                    <p>No loading, no lag. Just instant updates everywhere.</p>
+                <div class="feature">
+                    <h3>🏷️ Rich Metadata</h3>
+                    <p>Projects, priorities, effort estimates, due dates, and custom labels</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🏷️</div>
-                    <h3>Smart Organization</h3>
-                    <p>Projects, priorities, effort tracking, labels - stay organized.</p>
+                <div class="feature">
+                    <h3>🌙 Dark Mode</h3>
+                    <p>Easy on the eyes with built-in dark mode support</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌙</div>
-                    <h3>Dark Mode</h3>
-                    <p>Easy on the eyes, day or night.</p>
+                <div class="feature">
+                    <h3>📦 Archive & Search</h3>
+                    <p>Keep completed work organized and easily find what you need</p>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">Getting Started</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Click "Start New Board"</h3>
-                    <p>Or try the demo to explore features first</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Create Cards</h3>
-                    <p>Add tasks to Ideas, In Progress, or Done columns</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Drag & Drop</h3>
-                    <p>Move cards between columns as work progresses</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Access Anywhere</h3>
-                    <p>Bookmark the URL or add to your home screen</p>
-                </div>
+        <div class="cta-buttons">
+            <a href="app.html?demo=true" class="btn btn-primary">🚀 Try Demo Board</a>
+            <a href="app.html?new=true" class="btn btn-secondary">➕ Create New Board</a>
+        </div>
+
+        <div class="card">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <h3>Is Unblocked free to use?</h3>
+                <p>During beta, Unblocked is completely free! We're gathering feedback to build the best product possible. Pricing for the full release will be announced later.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>How does data sync work?</h3>
+                <p>Unblocked uses Firebase for real-time synchronization. Your data is stored in the cloud and syncs automatically across all your devices. Changes appear instantly!</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I use Unblocked offline?</h3>
+                <p>Basic functionality works offline using local storage. Your changes will sync to Firebase once you're back online.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Is my data private and secure?</h3>
+                <p>Currently in beta testing mode, data is stored in Firebase with test-mode security rules. Full authentication and private boards are coming in the next release!</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I collaborate with others?</h3>
+                <p>Board sharing and collaboration features are in development! For now, anyone with the board URL can view and edit cards (beta testing mode).</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>How do I add Unblocked to my iPhone/iPad?</h3>
+                <p>Open this site in Safari, tap the Share button, then "Add to Home Screen". It will work like a native app!</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I export my data?</h3>
+                <p>Yes! Use the Export button in the board to download all your cards as a JSON file. Import functionality lets you restore or share boards.</p>
             </div>
         </div>
-    </section>
 
-    <section id="faq" class="faq">
-        <div class="container">
-            <h2 class="section-title">Frequently Asked Questions</h2>
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h3>Is Unblocked really free?</h3>
-                    <p>Yes! During beta testing, Unblocked is completely free. We're gathering feedback and improving the product. We may introduce paid plans in the future, but beta users will receive special benefits.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Do I need to create an account?</h3>
-                    <p>Not during beta! Your board is stored in the cloud and accessible via URL. Bookmark it or add to your home screen to access anytime. (Authentication coming in future release.)</p>
-                </div>
-                <div class="faq-item">
-                    <h3>How do I access my board on multiple devices?</h3>
-                    <p>Simple! Just bookmark the URL (golfnutmj.github.io/unblocked/board.html) on each device. Your boards sync automatically via Firebase. For mobile, tap "Add to Home Screen" in Safari for app-like experience.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Is my data safe?</h3>
-                    <p>Your boards are stored in Google Firebase, a secure cloud platform. During beta, boards are publicly accessible if someone knows your URL. Full authentication and private boards coming soon!</p>
-                </div>
-                <div class="faq-item">
-                    <h3>What happens if I close my browser?</h3>
-                    <p>All your data is saved in the cloud. Nothing is lost when you close your browser. Just return to the same URL and everything will be there.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Can I share my board with my team?</h3>
-                    <p>Yes! Just share the URL. Everyone who opens it will see the same board with real-time updates. Perfect for small teams. (Advanced permissions coming later.)</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Does it work offline?</h3>
-                    <p>Limited offline support currently. You can view your board offline, but changes require internet connection to sync. Better offline support coming in future updates.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>How do I report bugs or request features?</h3>
-                    <p>We'd love your feedback! During beta, please email bugs and suggestions to: <a href="mailto:feedback@unblocked.app">feedback@unblocked.app</a></p>
-                </div>
-            </div>
+        <div class="disclaimer">
+            <h3>⚠️ Beta Testing Disclaimer</h3>
+            <p><strong>Important Information:</strong></p>
+            <p>• Unblocked is currently in BETA and provided "as-is" for testing purposes only</p>
+            <p>• Data security is in test mode - do not store sensitive or confidential information</p>
+            <p>• Features may change, and data could be reset during beta testing</p>
+            <p>• We recommend exporting your boards regularly as backup</p>
+            <p>• By using Unblocked, you acknowledge this is pre-release software and accept these limitations</p>
+            <p>• No warranty or guarantee of data persistence is provided during beta</p>
+            <p><strong>Full security and authentication features coming in v1.0 release!</strong></p>
         </div>
-    </section>
 
-    <section class="disclaimer">
-        <div class="container">
-            <h2 class="section-title">Disclaimer & Beta Notice</h2>
-            <div class="disclaimer-content">
-                <div class="disclaimer-box">
-                    <h3>⚠️ Beta Software</h3>
-                    <p>Unblocked is currently in <strong>beta testing</strong>. This means:</p>
-                    <ul>
-                        <li>Features may change or be removed without notice</li>
-                        <li>Bugs and unexpected behavior may occur</li>
-                        <li>Data loss is possible (though unlikely)</li>
-                        <li>Service availability is not guaranteed</li>
-                    </ul>
-                </div>
-                
-                <div class="disclaimer-box">
-                    <h3>📋 Use at Your Own Risk</h3>
-                    <p>While we strive to provide a reliable service:</p>
-                    <ul>
-                        <li>Unblocked is provided "as-is" without warranties</li>
-                        <li>We are not liable for any data loss or business impact</li>
-                        <li>Always keep backups of critical information</li>
-                        <li>Not recommended for mission-critical projects yet</li>
-                    </ul>
-                </div>
-
-                <div class="disclaimer-box">
-                    <h3>🔒 Privacy & Security</h3>
-                    <p>During beta testing:</p>
-                    <ul>
-                        <li>Boards are stored in Google Firebase (secure cloud)</li>
-                        <li>No user accounts or personal data collected yet</li>
-                        <li>Boards are accessible to anyone with the URL</li>
-                        <li>Do not store sensitive or confidential information</li>
-                        <li>Full authentication and privacy controls coming soon</li>
-                    </ul>
-                </div>
-
-                <div class="disclaimer-box">
-                    <h3>💰 Pricing & Future Plans</h3>
-                    <p>About our pricing:</p>
-                    <ul>
-                        <li>Currently free during beta testing</li>
-                        <li>May introduce paid plans after beta</li>
-                        <li>Beta users will receive special pricing/benefits</li>
-                        <li>Free tier will likely remain available</li>
-                        <li>30 days notice before any pricing changes</li>
-                    </ul>
-                </div>
-
-                <p class="disclaimer-footer">
-                    By using Unblocked, you acknowledge that you have read and understood these terms. 
-                    If you have questions, contact us at <a href="mailto:hello@unblocked.app">hello@unblocked.app</a>
-                </p>
-
-                <p class="disclaimer-footer">
-                    <strong>Last Updated:</strong> February 6, 2026 | <strong>Version:</strong> 1.0-beta
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta">
-        <div class="container">
-            <h2 class="cta-title">Ready to Get Unblocked?</h2>
-            <p class="cta-subtitle">Join our beta and help shape the future of kanban boards</p>
-            <div class="cta-buttons">
-                <a href="board.html" class="btn-cta-primary">Start Your Board Free</a>
-                <a href="board.html?demo=true" class="btn-cta-secondary">Try the Demo</a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="icon.png" alt="Unblocked" class="footer-logo-img">
-                    <span>Unblocked Beta</span>
-                </div>
-                <div class="footer-links">
-                    <a href="#features">Features</a>
-                    <a href="#faq">FAQ</a>
-                    <a href="board.html?demo=true">Demo</a>
-                    <a href="board.html">Start Board</a>
-                </div>
-                <div class="footer-social">
-                    <p>© 2026 Unblocked. Beta Release.</p>
-                    <p>Built with ❤️ by <a href="https://github.com/golfnutmj" target="_blank">@golfnutmj</a></p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-    </script>
+        <footer>
+            <p>Made with ❤️ by MJ | Unblocked Beta v0.9</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">© 2026 Unblocked. All rights reserved.</p>
+        </footer>
+    </div>
 </body>
 </html>

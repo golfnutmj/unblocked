@@ -1,3 +1,11 @@
+// Check URL parameters for mode
+const urlParams = new URLSearchParams(window.location.search);
+const isDemo = urlParams.get('demo') === 'true';
+const isNew = urlParams.get('new') === 'true';
+
+// Board collection name based on mode
+const boardCollectionName = isDemo ? 'demo-boards' : (isNew ? 'user-boards' : boardCollectionName);
+
 // Data structure
 let boards = {
     ideas: [],
@@ -7,7 +15,7 @@ let boards = {
 };
 
 let boardConfig = {
-    name: "🦊 MJ's Project Board" // Default board name
+    name: isDemo ? "🚀 Unblocked Demo Board" : (isNew ? "My Project Board" : "🦊 MJ's Project Board")
 };
 
 let currentCard = null;
@@ -33,87 +41,15 @@ function waitForFirebase() {
 }
 
 // Demo Data
-function loadDemoData() {
-    boards.ideas = [
-        {
-            id: Date.now() + 1,
-            title: 'Build a marketing website',
-            description: 'Create a landing page to showcase our product features and benefits',
-            project: 'relocation-helper',
-            priority: 'high',
-            effort: 'M',
-            labels: ['urgent'],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: Date.now() + 2,
-            title: 'Research competitor pricing',
-            description: 'Analyze what similar products charge and identify our pricing strategy',
-            project: 'earnings-digest',
-            priority: 'medium',
-            effort: 'S',
-            labels: ['research'],
-            createdAt: new Date().toISOString()
-        }
-    ];
-    
-    boards.progress = [
-        {
-            id: Date.now() + 3,
-            title: 'Design new app icon',
-            description: 'Create a professional, modern icon that stands out on home screens',
-            project: 'unblocked',
-            priority: 'high',
-            effort: 'S',
-            labels: [],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: Date.now() + 4,
-            title: 'Set up Firebase authentication',
-            description: 'Implement user login system with Google and email options',
-            project: 'unblocked',
-            priority: 'medium',
-            effort: 'L',
-            labels: [],
-            dueDate: '2026-02-15',
-            createdAt: new Date().toISOString()
-        }
-    ];
-    
-    boards.done = [
-        {
-            id: Date.now() + 5,
-            title: 'Launch beta version',
-            description: 'Successfully deployed Unblocked to GitHub Pages!',
-            project: 'unblocked',
-            priority: 'high',
-            effort: 'XL',
-            labels: [],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: Date.now() + 6,
-            title: 'Create welcome page',
-            description: 'Built professional landing page with features, FAQ, and disclaimer',
-            project: 'unblocked',
-            priority: 'high',
-            effort: 'M',
-            labels: [],
-            createdAt: new Date().toISOString()
-        }
-    ];
-    
-    boardConfig.name = '🚀 Unblocked Demo Board';
-}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     await waitForFirebase();
     
-    // Check if demo mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const isDemo = urlParams.get('demo') === 'true';
+    // Show demo banner if in demo mode
+    if (isDemo && document.getElementById('demoBanner')) {
+        document.getElementById('demoBanner').style.display = 'block';
+    }
     
     // Load dark mode preference
     if (localStorage.getItem('darkMode') === 'true') {
@@ -123,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load data from Firestore (or demo data)
     if (isDemo) {
-        loadDemoData();
+        loadFromFirestore();
     } else {
         await loadFromFirestore();
     }
@@ -141,11 +77,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Firestore Functions
 async function loadFromFirestore() {
+    // If demo mode, load from demo-data.json instead
+    if (isDemo) {
+        try {
+            const response = await fetch('demo-data.json');
+            const demoData = await response.json();
+            boards = demoData;
+            console.log('Demo data loaded successfully');
+            return;
+        } catch (err) {
+            console.error('Failed to load demo data:', err);
+        }
+    }
+    
     if (!isFirebaseReady) return;
     
     try {
         const db = window.firebaseDB;
-        const boardsRef = window.firebaseCollection(db, 'kanban-boards');
+        const boardsRef = window.firebaseCollection(db, boardCollectionName);
         
         // Listen for changes in each column including archived
         for (const column of ['ideas', 'progress', 'done', 'archived']) {
@@ -170,7 +119,7 @@ function setupFirestoreSync() {
     if (!isFirebaseReady) return;
     
     const db = window.firebaseDB;
-    const boardsRef = window.firebaseCollection(db, 'kanban-boards');
+    const boardsRef = window.firebaseCollection(db, boardCollectionName);
     
     // Real-time listeners for each column
     for (const column of ['ideas', 'progress', 'done', 'archived']) {
@@ -194,6 +143,13 @@ function setupFirestoreSync() {
 }
 
 async function saveToFirestore() {
+    // Demo mode: Don't save changes to Firebase
+    if (isDemo) {
+        console.log('Demo mode: Changes not saved to Firebase');
+        saveToLocalStorage();
+        return;
+    }
+    
     if (!isFirebaseReady) {
         console.warn('Firebase not ready, saving to localStorage');
         saveToLocalStorage();
@@ -202,7 +158,7 @@ async function saveToFirestore() {
     
     try {
         const db = window.firebaseDB;
-        const boardsRef = window.firebaseCollection(db, 'kanban-boards');
+        const boardsRef = window.firebaseCollection(db, boardCollectionName);
         
         // Save each column to Firestore including archived
         for (const column of ['ideas', 'progress', 'done', 'archived']) {
@@ -226,7 +182,7 @@ async function loadBoardConfig() {
     
     try {
         const db = window.firebaseDB;
-        const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
+        const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
         
         const snapshot = await new Promise((resolve) => {
             window.firebaseOnSnapshot(configRef, resolve, { includeMetadataChanges: false });
@@ -246,7 +202,7 @@ async function saveBoardConfig() {
     
     try {
         const db = window.firebaseDB;
-        const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
+        const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
         
         await window.firebaseSetDoc(configRef, {
             name: boardConfig.name,
@@ -261,7 +217,7 @@ function setupBoardConfigSync() {
     if (!isFirebaseReady) return;
     
     const db = window.firebaseDB;
-    const configRef = window.firebaseDoc(window.firebaseCollection(db, 'kanban-boards'), 'config');
+    const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
     
     window.firebaseOnSnapshot(configRef, (snapshot) => {
         if (snapshot.exists()) {

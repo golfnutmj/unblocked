@@ -1,0 +1,102 @@
+{
+  "ideas": [
+    {
+      "id": "demo-1",
+      "title": "Launch Marketing Campaign",
+      "description": "Plan and execute Q1 marketing campaign across social media channels",
+      "project": "other",
+      "priority": "high",
+      "effort": "M",
+      "dueDate": "2026-03-15",
+      "labels": ["urgent"],
+      "createdAt": "2026-02-01T10:00:00.000Z"
+    },
+    {
+      "id": "demo-2",
+      "title": "Design New Feature Mockups",
+      "description": "Create UI/UX mockups for the upcoming mobile app feature",
+      "project": "other",
+      "priority": "medium",
+      "effort": "S",
+      "labels": ["research"],
+      "createdAt": "2026-02-02T11:30:00.000Z"
+    },
+    {
+      "id": "demo-3",
+      "title": "Customer Feedback Analysis",
+      "description": "Review and categorize feedback from last month's user surveys",
+      "project": "other",
+      "priority": "low",
+      "effort": "S",
+      "labels": ["review"],
+      "createdAt": "2026-02-03T09:15:00.000Z"
+    }
+  ],
+  "progress": [
+    {
+      "id": "demo-4",
+      "title": "Website Redesign",
+      "description": "Update homepage layout and improve mobile responsiveness",
+      "project": "other",
+      "priority": "high",
+      "effort": "L",
+      "dueDate": "2026-02-20",
+      "labels": ["urgent"],
+      "createdAt": "2026-01-28T14:00:00.000Z"
+    },
+    {
+      "id": "demo-5",
+      "title": "API Documentation Update",
+      "description": "Document new endpoints and update code examples",
+      "project": "other",
+      "priority": "medium",
+      "effort": "M",
+      "labels": [],
+      "createdAt": "2026-01-30T16:45:00.000Z"
+    },
+    {
+      "id": "demo-6",
+      "title": "Fix Login Bug",
+      "description": "Users reporting timeout issues on mobile browsers",
+      "project": "other",
+      "priority": "high",
+      "effort": "S",
+      "dueDate": "2026-02-10",
+      "labels": ["bug", "urgent"],
+      "createdAt": "2026-02-05T08:30:00.000Z"
+    }
+  ],
+  "done": [
+    {
+      "id": "demo-7",
+      "title": "Database Migration Complete",
+      "description": "Successfully migrated from legacy database to new cloud infrastructure",
+      "project": "other",
+      "priority": "high",
+      "effort": "XL",
+      "labels": [],
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "demo-8",
+      "title": "Team Onboarding Materials",
+      "description": "Created comprehensive onboarding guide and video tutorials",
+      "project": "other",
+      "priority": "medium",
+      "effort": "M",
+      "labels": [],
+      "createdAt": "2026-01-20T13:20:00.000Z"
+    },
+    {
+      "id": "demo-9",
+      "title": "Q4 Analytics Report",
+      "description": "Compiled and presented quarterly performance metrics to stakeholders",
+      "project": "other",
+      "priority": "medium",
+      "effort": "M",
+      "labels": ["review"],
+      "createdAt": "2026-01-25T15:00:00.000Z"
+    }
+  ],
+  "archived": []
+}
