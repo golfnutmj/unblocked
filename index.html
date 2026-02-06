@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MJ's Project Board</title>
+    <title>Unblocked - Beautiful Kanban Boards</title>
     
     <!-- iOS Web App Config -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,186 +14,262 @@
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="landing-style.css">
 </head>
 <body>
-    <div class="header">
-        <div class="board-title-section">
-            <h1 id="boardTitle">🦊 MJ's Project Board</h1>
-            <button id="editBoardTitleBtn" class="btn-icon-small" title="Edit board name">✏️</button>
-        </div>
-        <div class="header-right">
-            <div class="search-group">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search cards...">
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <img src="icon.png" alt="Unblocked" class="logo-img">
+                <span class="logo-text">Unblocked</span>
+                <span class="beta-badge">BETA</span>
             </div>
-            <div class="filter-group">
-                <label for="projectFilter">Filter:</label>
-                <select id="projectFilter" class="filter-select">
-                    <option value="">All Projects</option>
-                    <option value="earnings-digest">📊 Earnings Digest</option>
-                    <option value="relocation-helper">🌍 Relocation Helper</option>
-                    <option value="photo-journey">📸 PhotoJourney AI</option>
-                    <option value="unblocked">🚀 Unblocked</option>
-                    <option value="other">💡 Other</option>
-                </select>
-            </div>
-            <div class="controls">
-                <button id="showArchiveBtn" class="btn-icon" title="Show Archive">📦</button>
-                <button id="darkModeToggle" class="btn-icon" title="Toggle Dark Mode">🌙</button>
-                <button id="exportBtn" class="btn-secondary" title="Export Data">Export</button>
-                <button id="importBtn" class="btn-secondary" title="Import Data">Import</button>
-                <input type="file" id="importFile" accept=".json" style="display: none;">
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
+                <a href="board.html?demo=true" class="btn-demo">Try Demo</a>
+                <a href="board.html" class="btn-primary">Start New Board</a>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="board" id="board">
-        <div class="column" data-column="ideas">
-            <div class="column-header">
-                <h2>💡 Ideas</h2>
-                <span class="card-count">0</span>
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Get <span class="gradient-text">Unblocked</span></h1>
+            <p class="hero-subtitle">Beautiful, real-time kanban boards that sync across all your devices</p>
+            <div class="hero-buttons">
+                <a href="board.html" class="btn-hero-primary">Start Your Board</a>
+                <a href="board.html?demo=true" class="btn-hero-secondary">View Demo</a>
             </div>
-            <div class="cards" id="ideas-cards"></div>
-            <button class="add-card-btn" data-column="ideas">+ Add Card</button>
+            <p class="beta-notice">⚠️ Currently in Beta Testing - Free while we improve!</p>
         </div>
-
-        <div class="column" data-column="progress">
-            <div class="column-header">
-                <h2>🚧 In Progress</h2>
-                <span class="card-count">0</span>
+        <div class="hero-visual">
+            <div class="floating-card card-1">
+                <div class="card-header">💡 Ideas</div>
+                <div class="card-body">Build something amazing</div>
             </div>
-            <div class="cards" id="progress-cards"></div>
-            <button class="add-card-btn" data-column="progress">+ Add Card</button>
+            <div class="floating-card card-2">
+                <div class="card-header">🚧 In Progress</div>
+                <div class="card-body">Making it happen</div>
+            </div>
+            <div class="floating-card card-3">
+                <div class="card-header">✅ Done</div>
+                <div class="card-body">Shipped!</div>
+            </div>
         </div>
+    </section>
 
-        <div class="column" data-column="done">
-            <div class="column-header">
-                <h2>✅ Done</h2>
-                <span class="card-count">0</span>
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Unblocked?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Real-Time Sync</h3>
+                    <p>Changes appear instantly across all devices. Work from anywhere.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Works on iPhone, iPad, Mac, PC - any device with a browser.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Beautiful Design</h3>
+                    <p>Clean, modern interface that makes work feel effortless.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>No loading, no lag. Just instant updates everywhere.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Smart Organization</h3>
+                    <p>Projects, priorities, effort tracking, labels - stay organized.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌙</div>
+                    <h3>Dark Mode</h3>
+                    <p>Easy on the eyes, day or night.</p>
+                </div>
             </div>
-            <div class="cards" id="done-cards"></div>
-            <button class="add-card-btn" data-column="done">+ Add Card</button>
         </div>
-    </div>
+    </section>
 
-    <!-- Card Modal -->
-    <div id="cardModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">New Card</h3>
-                <button class="close-btn" id="closeModal">&times;</button>
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Getting Started</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Click "Start New Board"</h3>
+                    <p>Or try the demo to explore features first</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Create Cards</h3>
+                    <p>Add tasks to Ideas, In Progress, or Done columns</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Drag & Drop</h3>
+                    <p>Move cards between columns as work progresses</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Access Anywhere</h3>
+                    <p>Bookmark the URL or add to your home screen</p>
+                </div>
             </div>
-            <div class="modal-body">
-                <input type="text" id="cardTitle" placeholder="Card title..." maxlength="100">
-                <textarea id="cardDescription" placeholder="Add description..." rows="5"></textarea>
+        </div>
+    </section>
+
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>Is Unblocked really free?</h3>
+                    <p>Yes! During beta testing, Unblocked is completely free. We're gathering feedback and improving the product. We may introduce paid plans in the future, but beta users will receive special benefits.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do I need to create an account?</h3>
+                    <p>Not during beta! Your board is stored in the cloud and accessible via URL. Bookmark it or add to your home screen to access anytime. (Authentication coming in future release.)</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How do I access my board on multiple devices?</h3>
+                    <p>Simple! Just bookmark the URL (golfnutmj.github.io/unblocked/board.html) on each device. Your boards sync automatically via Firebase. For mobile, tap "Add to Home Screen" in Safari for app-like experience.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is my data safe?</h3>
+                    <p>Your boards are stored in Google Firebase, a secure cloud platform. During beta, boards are publicly accessible if someone knows your URL. Full authentication and private boards coming soon!</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What happens if I close my browser?</h3>
+                    <p>All your data is saved in the cloud. Nothing is lost when you close your browser. Just return to the same URL and everything will be there.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I share my board with my team?</h3>
+                    <p>Yes! Just share the URL. Everyone who opens it will see the same board with real-time updates. Perfect for small teams. (Advanced permissions coming later.)</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Does it work offline?</h3>
+                    <p>Limited offline support currently. You can view your board offline, but changes require internet connection to sync. Better offline support coming in future updates.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How do I report bugs or request features?</h3>
+                    <p>We'd love your feedback! During beta, please email bugs and suggestions to: <a href="mailto:feedback@unblocked.app">feedback@unblocked.app</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="disclaimer">
+        <div class="container">
+            <h2 class="section-title">Disclaimer & Beta Notice</h2>
+            <div class="disclaimer-content">
+                <div class="disclaimer-box">
+                    <h3>⚠️ Beta Software</h3>
+                    <p>Unblocked is currently in <strong>beta testing</strong>. This means:</p>
+                    <ul>
+                        <li>Features may change or be removed without notice</li>
+                        <li>Bugs and unexpected behavior may occur</li>
+                        <li>Data loss is possible (though unlikely)</li>
+                        <li>Service availability is not guaranteed</li>
+                    </ul>
+                </div>
                 
-                <div class="card-metadata">
-                    <div class="metadata-group">
-                        <label>Project</label>
-                        <select id="cardProject">
-                            <option value="">None</option>
-                            <option value="earnings-digest">📊 Earnings Digest</option>
-                            <option value="relocation-helper">🌍 Relocation Helper</option>
-                            <option value="photo-journey">📸 PhotoJourney AI</option>
-                            <option value="unblocked">🚀 Unblocked</option>
-                            <option value="other">💡 Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="metadata-group">
-                        <label>Priority</label>
-                        <select id="cardPriority">
-                            <option value="">None</option>
-                            <option value="high">🔴 High</option>
-                            <option value="medium">🟡 Medium</option>
-                            <option value="low">🟢 Low</option>
-                        </select>
-                    </div>
-                    
-                    <div class="metadata-group">
-                        <label>Level of Effort</label>
-                        <select id="cardEffort">
-                            <option value="">None</option>
-                            <option value="S">S - Small (1-2 days)</option>
-                            <option value="M">M - Medium (3-5 days)</option>
-                            <option value="L">L - Large (1-2 weeks)</option>
-                            <option value="XL">XL - Extra Large (2+ weeks)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="metadata-group">
-                        <label>Due Date</label>
-                        <input type="date" id="cardDueDate" class="date-input">
-                    </div>
-                    
-                    <div class="metadata-group full-width">
-                        <label>Labels</label>
-                        <div class="label-selector">
-                            <button type="button" class="label-btn" data-label="urgent">🔥 Urgent</button>
-                            <button type="button" class="label-btn" data-label="research">📚 Research</button>
-                            <button type="button" class="label-btn" data-label="blocked">🚧 Blocked</button>
-                            <button type="button" class="label-btn" data-label="review">👀 Review</button>
-                            <button type="button" class="label-btn" data-label="bug">🐛 Bug</button>
-                        </div>
-                    </div>
+                <div class="disclaimer-box">
+                    <h3>📋 Use at Your Own Risk</h3>
+                    <p>While we strive to provide a reliable service:</p>
+                    <ul>
+                        <li>Unblocked is provided "as-is" without warranties</li>
+                        <li>We are not liable for any data loss or business impact</li>
+                        <li>Always keep backups of critical information</li>
+                        <li>Not recommended for mission-critical projects yet</li>
+                    </ul>
                 </div>
+
+                <div class="disclaimer-box">
+                    <h3>🔒 Privacy & Security</h3>
+                    <p>During beta testing:</p>
+                    <ul>
+                        <li>Boards are stored in Google Firebase (secure cloud)</li>
+                        <li>No user accounts or personal data collected yet</li>
+                        <li>Boards are accessible to anyone with the URL</li>
+                        <li>Do not store sensitive or confidential information</li>
+                        <li>Full authentication and privacy controls coming soon</li>
+                    </ul>
+                </div>
+
+                <div class="disclaimer-box">
+                    <h3>💰 Pricing & Future Plans</h3>
+                    <p>About our pricing:</p>
+                    <ul>
+                        <li>Currently free during beta testing</li>
+                        <li>May introduce paid plans after beta</li>
+                        <li>Beta users will receive special pricing/benefits</li>
+                        <li>Free tier will likely remain available</li>
+                        <li>30 days notice before any pricing changes</li>
+                    </ul>
+                </div>
+
+                <p class="disclaimer-footer">
+                    By using Unblocked, you acknowledge that you have read and understood these terms. 
+                    If you have questions, contact us at <a href="mailto:hello@unblocked.app">hello@unblocked.app</a>
+                </p>
+
+                <p class="disclaimer-footer">
+                    <strong>Last Updated:</strong> February 6, 2026 | <strong>Version:</strong> 1.0-beta
+                </p>
             </div>
-            <div class="modal-footer">
-                <div class="modal-left-actions">
-                    <button id="archiveCard" class="btn-secondary" style="display: none;">📦 Archive</button>
-                    <button id="deleteCard" class="btn-danger" style="display: none;">Delete</button>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2 class="cta-title">Ready to Get Unblocked?</h2>
+            <p class="cta-subtitle">Join our beta and help shape the future of kanban boards</p>
+            <div class="cta-buttons">
+                <a href="board.html" class="btn-cta-primary">Start Your Board Free</a>
+                <a href="board.html?demo=true" class="btn-cta-secondary">Try the Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="icon.png" alt="Unblocked" class="footer-logo-img">
+                    <span>Unblocked Beta</span>
                 </div>
-                <div class="modal-actions">
-                    <button id="cancelCard" class="btn-secondary">Cancel</button>
-                    <button id="saveCard" class="btn-primary">Save</button>
+                <div class="footer-links">
+                    <a href="#features">Features</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="board.html?demo=true">Demo</a>
+                    <a href="board.html">Start Board</a>
+                </div>
+                <div class="footer-social">
+                    <p>© 2026 Unblocked. Beta Release.</p>
+                    <p>Built with ❤️ by <a href="https://github.com/golfnutmj" target="_blank">@golfnutmj</a></p>
                 </div>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <!-- Archive Modal -->
-    <div id="archiveModal" class="modal">
-        <div class="modal-content archive-modal-content">
-            <div class="modal-header">
-                <h3>📦 Archived Cards</h3>
-                <button class="close-btn" id="closeArchive">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="archiveList" class="archive-list"></div>
-            </div>
-            <div class="modal-footer">
-                <button id="closeArchiveBtn" class="btn-secondary">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyD1fPSRqX79I8bNMyZG3mgsseXXmh-hoFQ",
-            authDomain: "unblocked-78906.firebaseapp.com",
-            projectId: "unblocked-78906",
-            storageBucket: "unblocked-78906.firebasestorage.app",
-            messagingSenderId: "514738781698",
-            appId: "1:514738781698:web:918cf3f0bc4504bd41f11b"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Make Firebase available globally
-        window.firebaseDB = db;
-        window.firebaseDoc = doc;
-        window.firebaseSetDoc = setDoc;
-        window.firebaseDeleteDoc = deleteDoc;
-        window.firebaseCollection = collection;
-        window.firebaseOnSnapshot = onSnapshot;
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
     </script>
-    <script src="script.js"></script>
 </body>
 </html>

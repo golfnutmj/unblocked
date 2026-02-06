@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unblocked - Your Project Board</title>
+    
+    <!-- iOS Web App Config -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Unblocked">
+    
+    <!-- App Icons -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="board-title-section">
+            <h1 id="boardTitle">🦊 MJ's Project Board</h1>
+            <button id="editBoardTitleBtn" class="btn-icon-small" title="Edit board name">✏️</button>
+        </div>
+        <div class="header-right">
+            <div class="search-group">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search cards...">
+            </div>
+            <div class="filter-group">
+                <label for="projectFilter">Filter:</label>
+                <select id="projectFilter" class="filter-select">
+                    <option value="">All Projects</option>
+                    <option value="earnings-digest">📊 Earnings Digest</option>
+                    <option value="relocation-helper">🌍 Relocation Helper</option>
+                    <option value="photo-journey">📸 PhotoJourney AI</option>
+                    <option value="unblocked">🚀 Unblocked</option>
+                    <option value="other">💡 Other</option>
+                </select>
+            </div>
+            <div class="controls">
+                <button id="showArchiveBtn" class="btn-icon" title="Show Archive">📦</button>
+                <button id="darkModeToggle" class="btn-icon" title="Toggle Dark Mode">🌙</button>
+                <button id="exportBtn" class="btn-secondary" title="Export Data">Export</button>
+                <button id="importBtn" class="btn-secondary" title="Import Data">Import</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <div class="board" id="board">
+        <div class="column" data-column="ideas">
+            <div class="column-header">
+                <h2>💡 Ideas</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="ideas-cards"></div>
+            <button class="add-card-btn" data-column="ideas">+ Add Card</button>
+        </div>
+
+        <div class="column" data-column="progress">
+            <div class="column-header">
+                <h2>🚧 In Progress</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="progress-cards"></div>
+            <button class="add-card-btn" data-column="progress">+ Add Card</button>
+        </div>
+
+        <div class="column" data-column="done">
+            <div class="column-header">
+                <h2>✅ Done</h2>
+                <span class="card-count">0</span>
+            </div>
+            <div class="cards" id="done-cards"></div>
+            <button class="add-card-btn" data-column="done">+ Add Card</button>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">New Card</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="cardTitle" placeholder="Card title..." maxlength="100">
+                <textarea id="cardDescription" placeholder="Add description..." rows="5"></textarea>
+                
+                <div class="card-metadata">
+                    <div class="metadata-group">
+                        <label>Project</label>
+                        <select id="cardProject">
+                            <option value="">None</option>
+                            <option value="earnings-digest">📊 Earnings Digest</option>
+                            <option value="relocation-helper">🌍 Relocation Helper</option>
+                            <option value="photo-journey">📸 PhotoJourney AI</option>
+                            <option value="unblocked">🚀 Unblocked</option>
+                            <option value="other">💡 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="metadata-group">
+                        <label>Priority</label>
+                        <select id="cardPriority">
+                            <option value="">None</option>
+                            <option value="high">🔴 High</option>
+                            <option value="medium">🟡 Medium</option>
+                            <option value="low">🟢 Low</option>
+                        </select>
+                    </div>
+                    
+                    <div class="metadata-group">
+                        <label>Level of Effort</label>
+                        <select id="cardEffort">
+                            <option value="">None</option>
+                            <option value="S">S - Small (1-2 days)</option>
+                            <option value="M">M - Medium (3-5 days)</option>
+                            <option value="L">L - Large (1-2 weeks)</option>
+                            <option value="XL">XL - Extra Large (2+ weeks)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="metadata-group">
+                        <label>Due Date</label>
+                        <input type="date" id="cardDueDate" class="date-input">
+                    </div>
+                    
+                    <div class="metadata-group full-width">
+                        <label>Labels</label>
+                        <div class="label-selector">
+                            <button type="button" class="label-btn" data-label="urgent">🔥 Urgent</button>
+                            <button type="button" class="label-btn" data-label="research">📚 Research</button>
+                            <button type="button" class="label-btn" data-label="blocked">🚧 Blocked</button>
+                            <button type="button" class="label-btn" data-label="review">👀 Review</button>
+                            <button type="button" class="label-btn" data-label="bug">🐛 Bug</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-left-actions">
+                    <button id="archiveCard" class="btn-secondary" style="display: none;">📦 Archive</button>
+                    <button id="deleteCard" class="btn-danger" style="display: none;">Delete</button>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancelCard" class="btn-secondary">Cancel</button>
+                    <button id="saveCard" class="btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive Modal -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content archive-modal-content">
+            <div class="modal-header">
+                <h3>📦 Archived Cards</h3>
+                <button class="close-btn" id="closeArchive">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="archiveList" class="archive-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeArchiveBtn" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1fPSRqX79I8bNMyZG3mgsseXXmh-hoFQ",
+            authDomain: "unblocked-78906.firebaseapp.com",
+            projectId: "unblocked-78906",
+            storageBucket: "unblocked-78906.firebasestorage.app",
+            messagingSenderId: "514738781698",
+            appId: "1:514738781698:web:918cf3f0bc4504bd41f11b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.firebaseDB = db;
+        window.firebaseDoc = doc;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseDeleteDoc = deleteDoc;
+        window.firebaseCollection = collection;
+        window.firebaseOnSnapshot = onSnapshot;
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

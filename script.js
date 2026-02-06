@@ -32,9 +32,88 @@ function waitForFirebase() {
     });
 }
 
+// Demo Data
+function loadDemoData() {
+    boards.ideas = [
+        {
+            id: Date.now() + 1,
+            title: 'Build a marketing website',
+            description: 'Create a landing page to showcase our product features and benefits',
+            project: 'relocation-helper',
+            priority: 'high',
+            effort: 'M',
+            labels: ['urgent'],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: Date.now() + 2,
+            title: 'Research competitor pricing',
+            description: 'Analyze what similar products charge and identify our pricing strategy',
+            project: 'earnings-digest',
+            priority: 'medium',
+            effort: 'S',
+            labels: ['research'],
+            createdAt: new Date().toISOString()
+        }
+    ];
+    
+    boards.progress = [
+        {
+            id: Date.now() + 3,
+            title: 'Design new app icon',
+            description: 'Create a professional, modern icon that stands out on home screens',
+            project: 'unblocked',
+            priority: 'high',
+            effort: 'S',
+            labels: [],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: Date.now() + 4,
+            title: 'Set up Firebase authentication',
+            description: 'Implement user login system with Google and email options',
+            project: 'unblocked',
+            priority: 'medium',
+            effort: 'L',
+            labels: [],
+            dueDate: '2026-02-15',
+            createdAt: new Date().toISOString()
+        }
+    ];
+    
+    boards.done = [
+        {
+            id: Date.now() + 5,
+            title: 'Launch beta version',
+            description: 'Successfully deployed Unblocked to GitHub Pages!',
+            project: 'unblocked',
+            priority: 'high',
+            effort: 'XL',
+            labels: [],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: Date.now() + 6,
+            title: 'Create welcome page',
+            description: 'Built professional landing page with features, FAQ, and disclaimer',
+            project: 'unblocked',
+            priority: 'high',
+            effort: 'M',
+            labels: [],
+            createdAt: new Date().toISOString()
+        }
+    ];
+    
+    boardConfig.name = '🚀 Unblocked Demo Board';
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     await waitForFirebase();
+    
+    // Check if demo mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemo = urlParams.get('demo') === 'true';
     
     // Load dark mode preference
     if (localStorage.getItem('darkMode') === 'true') {
@@ -42,8 +121,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('darkModeToggle').textContent = '☀️';
     }
     
-    // Load data from Firestore
-    await loadFromFirestore();
+    // Load data from Firestore (or demo data)
+    if (isDemo) {
+        loadDemoData();
+    } else {
+        await loadFromFirestore();
+    }
     await loadBoardConfig();
     
     renderAllColumns();
