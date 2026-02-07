@@ -34,7 +34,6 @@
                 <label for="projectFilter">Filter:</label>
                 <select id="projectFilter" class="filter-select">
                     <option value="">All Projects</option>
-                    <!-- Dynamic project options populated by JS -->
                 </select>
                 <button id="manageProjectsBtn" class="btn-icon-small" title="Manage Projects">⚙️</button>
             </div>
@@ -93,7 +92,6 @@
                         <label>Project</label>
                         <select id="cardProject">
                             <option value="">None</option>
-                            <!-- Dynamic project options populated by JS -->
                         </select>
                     </div>
                     
@@ -168,29 +166,23 @@
     <div id="projectModal" class="modal">
         <div class="modal-content project-modal-content">
             <div class="modal-header">
-                <h3>⚙️ Manage Projects</h3>
+                <h3>Manage Projects</h3>
                 <button class="close-btn" id="closeProjectModal">&times;</button>
             </div>
-            <div class="modal-body">
-                <p class="project-modal-hint">Drag to reorder. Projects sync across all your devices.</p>
+            <div class="modal-body project-modal-body">
                 <div id="projectList" class="project-list"></div>
-                <div class="add-project-section">
-                    <div class="add-project-row">
-                        <button type="button" id="projectEmojiBtn" class="emoji-picker-btn" title="Pick emoji">📁</button>
-                        <input type="text" id="newProjectName" placeholder="New project name..." maxlength="40" class="project-name-input">
-                        <input type="color" id="newProjectColor" value="#48bb78" class="color-picker-input" title="Project color">
-                        <button id="addProjectBtn" class="btn-primary btn-small">+ Add</button>
-                    </div>
-                    <div id="emojiPicker" class="emoji-picker" style="display: none;"></div>
+                <div class="add-project-bar" id="addProjectBar">
+                    <button type="button" id="projectEmojiBtn" class="pm-emoji-btn" title="Pick emoji">📁</button>
+                    <input type="text" id="newProjectName" placeholder="Add a project..." maxlength="40">
+                    <div class="pm-color-swatches" id="addColorSwatches"></div>
+                    <button id="addProjectBtn" class="pm-add-btn" title="Add project">+</button>
                 </div>
+                <!-- Floating emoji picker, positioned via JS -->
+                <div id="emojiPickerPopover" class="emoji-popover"></div>
             </div>
-            <div class="modal-footer">
-                <div class="modal-left-actions">
-                    <span class="project-count-info" id="projectCountInfo"></span>
-                </div>
-                <div class="modal-actions">
-                    <button id="closeProjectModalBtn" class="btn-secondary">Done</button>
-                </div>
+            <div class="modal-footer project-modal-footer">
+                <span class="project-count-info" id="projectCountInfo"></span>
+                <button id="closeProjectModalBtn" class="btn-primary">Done</button>
             </div>
         </div>
     </div>
@@ -200,7 +192,6 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD1fPSRqX79I8bNMyZG3mgsseXXmh-hoFQ",
             authDomain: "unblocked-78906.firebaseapp.com",
@@ -210,11 +201,9 @@
             appId: "1:514738781698:web:918cf3f0bc4504bd41f11b"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Make Firebase available globally
         window.firebaseDB = db;
         window.firebaseDoc = doc;
         window.firebaseSetDoc = setDoc;

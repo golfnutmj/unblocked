@@ -199,7 +199,6 @@ body {
     overflow: hidden;
 }
 
-/* Project color stripe on cards */
 .card[data-project-color]::before {
     content: '';
     position: absolute;
@@ -552,7 +551,7 @@ body {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Project Badge - dynamic color variant */
+/* Project Badge */
 .badge-project {
     font-weight: 600;
 }
@@ -803,311 +802,474 @@ body {
 
 
 /* ============================================
-   PROJECT MANAGEMENT STYLES
+   PROJECT MANAGEMENT — REDESIGNED
    ============================================ */
 
-/* Project Modal */
 .project-modal-content {
-    max-width: 560px;
-    max-height: 90vh;
+    max-width: 480px;
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
 }
 
-.project-modal-content .modal-body {
+.project-modal-body {
     overflow-y: auto;
     flex: 1;
     min-height: 0;
+    padding: 1rem 1.5rem !important;
+    gap: 0 !important;
+    position: relative;
 }
 
-.project-modal-hint {
-    font-size: 0.82rem;
+.project-modal-footer {
+    padding: 1rem 1.5rem;
+}
+
+.project-count-info {
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    font-style: italic;
 }
 
-/* Project List */
+/* --- Project List --- */
 .project-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
+    gap: 2px;
+    margin-bottom: 0.75rem;
 }
 
-.project-item {
+/* --- Single Project Row --- */
+.project-row {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.7rem 0.85rem;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    transition: all 0.15s ease;
+    gap: 0.5rem;
+    padding: 0.55rem 0.65rem;
+    border-radius: 6px;
+    transition: background 0.12s;
     cursor: grab;
     user-select: none;
+    position: relative;
 }
 
-.project-item:active {
+.project-row:hover {
+    background: var(--bg-tertiary);
+}
+
+.project-row:active {
     cursor: grabbing;
 }
 
-.project-item:hover {
-    border-color: var(--accent);
+.project-row.dragging-project {
+    opacity: 0.35;
 }
 
-.project-item.drag-over-project {
-    border-color: var(--accent);
-    background: rgba(102, 126, 234, 0.08);
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+.project-row.drag-over-project {
+    box-shadow: 0 -2px 0 0 var(--accent);
 }
 
-.project-item.dragging-project {
-    opacity: 0.4;
-    transform: scale(0.98);
+.project-row.is-archived {
+    opacity: 0.45;
 }
 
-.project-item.archived-project {
-    opacity: 0.5;
-    border-style: dashed;
+/* Color stripe (left edge indicator) */
+.pr-color {
+    width: 4px;
+    height: 24px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.1s;
 }
 
-.project-drag-handle {
-    color: var(--text-secondary);
+.pr-color:hover {
+    transform: scaleY(1.3);
+}
+
+.pr-emoji {
     font-size: 1rem;
-    cursor: grab;
-    flex-shrink: 0;
-    opacity: 0.4;
-    transition: opacity 0.15s;
-    line-height: 1;
-}
-
-.project-item:hover .project-drag-handle {
-    opacity: 0.8;
-}
-
-.project-color-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 2px solid rgba(0,0,0,0.1);
-}
-
-.project-emoji {
-    font-size: 1.1rem;
     flex-shrink: 0;
     line-height: 1;
+    width: 1.4rem;
+    text-align: center;
 }
 
-.project-item-name {
+.pr-name {
     flex: 1;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.project-card-count {
-    font-size: 0.75rem;
+.pr-count {
+    font-size: 0.72rem;
     color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 0.15rem 0.5rem;
-    border-radius: 10px;
     flex-shrink: 0;
-    font-weight: 600;
+    opacity: 0.7;
+    min-width: 1.5rem;
+    text-align: right;
 }
 
-.project-item-actions {
-    display: flex;
-    gap: 0.25rem;
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-
-.project-item:hover .project-item-actions {
-    opacity: 1;
-}
-
-.project-action-btn {
+.pr-menu-btn {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0.3rem;
+    font-size: 1rem;
+    padding: 0.15rem 0.3rem;
     border-radius: 4px;
-    transition: background 0.15s;
+    opacity: 0;
+    transition: all 0.12s;
+    color: var(--text-secondary);
+    flex-shrink: 0;
     line-height: 1;
 }
 
-.project-action-btn:hover {
+.project-row:hover .pr-menu-btn {
+    opacity: 0.6;
+}
+
+.pr-menu-btn:hover {
+    opacity: 1 !important;
+    background: var(--border-color);
+}
+
+/* --- Inline Context Menu --- */
+.pr-context-menu {
+    position: absolute;
+    right: 0.5rem;
+    top: 100%;
+    z-index: 20;
     background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    padding: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+    animation: fadeIn 0.1s ease;
 }
 
-/* Add Project Section */
-.add-project-section {
-    border-top: 1px solid var(--border-color);
-    padding-top: 1rem;
-}
-
-.add-project-row {
+.pr-context-item {
+    padding: 0.45rem 0.75rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: left;
+    border-radius: 5px;
+    color: var(--text-primary);
+    transition: background 0.1s;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.emoji-picker-btn {
-    width: 40px;
-    height: 40px;
+.pr-context-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.pr-context-item.danger {
+    color: var(--danger);
+}
+
+.pr-context-item.danger:hover {
+    background: rgba(245, 101, 101, 0.1);
+}
+
+/* --- Expand-to-Edit Row --- */
+.project-edit-expanded {
+    background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    background: var(--bg-primary);
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-}
-
-.emoji-picker-btn:hover {
-    border-color: var(--accent);
-    transform: scale(1.05);
-}
-
-.project-name-input {
-    flex: 1;
-    min-width: 0;
-}
-
-.color-picker-input {
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    padding: 2px;
-    background: var(--bg-primary);
-    flex-shrink: 0;
-}
-
-.color-picker-input::-webkit-color-swatch-wrapper {
-    padding: 2px;
-}
-
-.color-picker-input::-webkit-color-swatch {
-    border: none;
-    border-radius: 4px;
-}
-
-/* Emoji Picker */
-.emoji-picker {
-    margin-top: 0.75rem;
     padding: 0.75rem;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 2px 0;
     animation: fadeIn 0.15s ease;
 }
 
-.emoji-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 0.25rem;
+.pe-top-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.emoji-option {
+.pe-emoji-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.12s;
+}
+
+.pe-emoji-btn:hover {
+    border-color: var(--accent);
+}
+
+.pe-name-input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    min-width: 0;
+    outline: none;
+    transition: border-color 0.12s;
+}
+
+.pe-name-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.12);
+}
+
+.pe-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.pe-save-btn, .pe-cancel-btn {
+    padding: 0.35rem 0.7rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.12s;
+}
+
+.pe-save-btn {
+    background: var(--accent);
+    color: white;
+}
+
+.pe-save-btn:hover {
+    background: var(--accent-hover);
+}
+
+.pe-cancel-btn {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.pe-cancel-btn:hover {
+    background: var(--border-color);
+}
+
+/* --- Color Swatches Row --- */
+.pe-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding-left: 0.15rem;
+}
+
+.pe-color-row-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+    flex-shrink: 0;
+}
+
+.color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    flex-shrink: 0;
+}
+
+.color-swatch:hover {
+    transform: scale(1.25);
+}
+
+.color-swatch.selected {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--text-primary);
+    transform: scale(1.15);
+}
+
+/* --- Add Project Bar --- */
+.add-project-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    margin-top: 0.25rem;
+    transition: border-color 0.15s;
+}
+
+.add-project-bar:focus-within {
+    border-color: var(--accent);
+    border-style: solid;
+}
+
+.pm-emoji-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.12s;
+}
+
+.pm-emoji-btn:hover {
+    background: var(--border-color);
+}
+
+.add-project-bar input {
+    flex: 1;
+    border: none !important;
+    background: transparent !important;
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.88rem !important;
+    box-shadow: none !important;
+    outline: none !important;
+    min-width: 0;
+}
+
+.pm-color-swatches {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.pm-color-swatches .color-swatch {
+    width: 18px;
+    height: 18px;
+}
+
+.pm-add-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.12s;
+    line-height: 1;
+}
+
+.pm-add-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.05);
+}
+
+/* --- Emoji Popover --- */
+.emoji-popover {
+    display: none;
+    position: absolute;
+    z-index: 30;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    padding: 0.65rem;
+    width: 240px;
+    animation: fadeIn 0.12s ease;
+}
+
+.emoji-popover.visible {
+    display: block;
+}
+
+.emoji-popover-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.emoji-popover-grid button {
     width: 100%;
     aspect-ratio: 1;
     border: none;
     background: none;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.1s ease;
+    transition: all 0.08s;
 }
 
-.emoji-option:hover {
+.emoji-popover-grid button:hover {
     background: var(--bg-tertiary);
-    transform: scale(1.2);
+    transform: scale(1.15);
 }
 
-.emoji-option.selected {
+.emoji-popover-grid button.selected {
     background: rgba(102, 126, 234, 0.15);
-    box-shadow: 0 0 0 2px var(--accent);
 }
 
-/* Project Count Info */
-.project-count-info {
-    font-size: 0.82rem;
+/* --- Section divider for archived --- */
+.project-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     color: var(--text-secondary);
+    padding: 0.6rem 0.65rem 0.25rem;
+    opacity: 0.6;
 }
 
-/* Inline Edit for Project Name */
-.project-edit-input {
-    padding: 0.3rem 0.5rem;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    flex: 1;
-    min-width: 0;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-}
-
-/* Color edit picker inline */
-.project-color-edit {
-    width: 28px;
-    height: 28px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    padding: 1px;
-    background: var(--bg-secondary);
-    flex-shrink: 0;
-}
-
-.project-color-edit::-webkit-color-swatch-wrapper {
-    padding: 1px;
-}
-
-.project-color-edit::-webkit-color-swatch {
-    border: none;
-    border-radius: 3px;
-}
-
-/* Mobile project modal */
+/* --- Mobile --- */
 @media (max-width: 768px) {
     .project-modal-content {
         max-width: 95%;
-        max-height: 85vh;
+        max-height: 88vh;
     }
     
-    .emoji-picker-grid {
+    .pr-menu-btn {
+        opacity: 0.5;
+    }
+    
+    .pm-color-swatches .color-swatch {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .emoji-popover {
+        left: 50% !important;
+        transform: translateX(-50%);
+        width: 260px;
+    }
+    
+    .emoji-popover-grid {
         grid-template-columns: repeat(6, 1fr);
-    }
-    
-    .project-item-actions {
-        opacity: 1;
-    }
-    
-    .add-project-row {
-        flex-wrap: wrap;
-    }
-    
-    .project-name-input {
-        flex-basis: 100%;
-        order: -1;
     }
 }

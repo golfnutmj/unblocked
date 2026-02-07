@@ -3,7 +3,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const isDemo = urlParams.get('demo') === 'true';
 const isNew = urlParams.get('new') === 'true';
 
-// Board collection name based on mode
+// Board collection name based on mode (fixed self-reference bug)
 const boardCollectionName = isDemo ? 'demo-boards' : (isNew ? 'user-boards' : 'boards');
 
 // Data structure
@@ -22,7 +22,6 @@ let boardConfig = {
 // DYNAMIC PROJECT SYSTEM
 // ============================================
 
-// Default projects (used for new boards or migration)
 const DEFAULT_PROJECTS = [
     { id: 'project-1', name: 'Project 1', emoji: '📊', color: '#667eea', order: 0, archived: false },
     { id: 'project-2', name: 'Project 2', emoji: '🌍', color: '#ed8936', order: 1, archived: false },
@@ -31,23 +30,36 @@ const DEFAULT_PROJECTS = [
     { id: 'project-5', name: 'Project 5', emoji: '💡', color: '#a0aec0', order: 4, archived: false }
 ];
 
-// Curated emoji set for the picker
+// Old hardcoded project IDs that need migration
+const OLD_PROJECT_IDS = ['earnings-digest', 'relocation-helper', 'photo-journey', 'unblocked', 'other'];
+
+// Color palette for project swatches
+const COLOR_PALETTE = [
+    '#667eea', '#5a67d8', '#4c51bf',
+    '#ed8936', '#dd6b20', '#e53e3e',
+    '#48bb78', '#38a169', '#319795',
+    '#9f7aea', '#805ad5', '#d53f8c',
+    '#ecc94b', '#a0aec0', '#718096'
+];
+
 const EMOJI_OPTIONS = [
     '📊', '🌍', '📸', '🚀', '💡', '📁', '🎯', '💰',
     '🏠', '✈️', '🎨', '📱', '🖥️', '🎬', '📝', '🔬',
     '🛒', '📈', '🎓', '🏋️', '🍳', '🎵', '📧', '🤖',
-    '⚡', '🔧', '🌱', '🎮', '📦', '🔒', '❤️', '⭐'
+    '⚡', '🔧', '🌱', '🎮', '📦', '🔒', '❤️', '⭐',
+    '🧪', '🎪'
 ];
 
-let boardProjects = []; // Dynamic projects array
-
+let boardProjects = [];
 let currentCard = null;
 let editingCard = null;
 let activeFilter = '';
 let searchQuery = '';
 let selectedLabels = [];
 let isFirebaseReady = false;
-let selectedEmoji = '📁'; // For the add-project emoji picker
+let selectedAddEmoji = '📁';
+let selectedAddColor = COLOR_PALETTE[0];
+let openContextMenuId = null;
 
 // Wait for Firebase to be ready
 function waitForFirebase() {
@@ -66,22 +78,22 @@ function waitForFirebase() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set title immediately from boardConfig (no flash of wrong title)
+    // Set title immediately (no flash of wrong title)
     updateBoardTitle();
-    
+
     await waitForFirebase();
-    
+
     // Show demo banner if in demo mode
     if (isDemo && document.getElementById('demoBanner')) {
         document.getElementById('demoBanner').style.display = 'block';
     }
-    
+
     // Load dark mode preference
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
         document.getElementById('darkModeToggle').textContent = '☀️';
     }
-    
+
     // Load data from Firestore
     if (isDemo) {
         loadFromFirestore();
@@ -90,17 +102,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     await loadBoardConfig();
     await loadProjects();
-    
+
     populateProjectDropdowns();
     renderAllColumns();
     setupEventListeners();
     updateAllCounts();
     updateBoardTitle();
-    
+
     // Setup real-time sync
     setupFirestoreSync();
     setupBoardConfigSync();
     setupProjectSync();
+
+    // Close context menus on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.pr-context-menu') && !e.target.closest('.pr-menu-btn')) {
+            closeAllContextMenus();
+        }
+        if (!e.target.closest('.emoji-popover') && !e.target.closest('.pm-emoji-btn') && !e.target.closest('.pe-emoji-btn')) {
+            closeEmojiPopover();
+        }
+    });
 });
 
 // ============================================
@@ -112,15 +134,15 @@ async function loadProjects() {
         boardProjects = [...DEFAULT_PROJECTS];
         return;
     }
-    
+
     try {
         const db = window.firebaseDB;
         const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'projects');
-        
+
         const snapshot = await new Promise((resolve) => {
             window.firebaseOnSnapshot(configRef, resolve, { includeMetadataChanges: false });
         });
-        
+
         if (snapshot.exists()) {
             const data = snapshot.data();
             boardProjects = data.list || [];
@@ -134,8 +156,11 @@ async function loadProjects() {
                 archived: p.archived || false
             }));
             boardProjects.sort((a, b) => a.order - b.order);
+
+            // Migration: detect old hardcoded projects and replace
+            migrateOldProjects();
         } else {
-            // First time: migrate from hardcoded defaults
+            // First time: seed with defaults
             boardProjects = [...DEFAULT_PROJECTS];
             await saveProjects();
         }
@@ -145,21 +170,47 @@ async function loadProjects() {
     }
 }
 
-async function saveProjects() {
-    if (isDemo) {
-        console.log('Demo mode: Project changes not saved');
-        return;
+function migrateOldProjects() {
+    // Check if all projects match old hardcoded IDs with no custom additions
+    const currentIds = boardProjects.map(p => p.id);
+    const isOldDefaults = OLD_PROJECT_IDS.every(id => currentIds.includes(id))
+        && boardProjects.length === OLD_PROJECT_IDS.length;
+
+    if (isOldDefaults) {
+        const idMap = {};
+        boardProjects = DEFAULT_PROJECTS.map((dp, i) => {
+            const oldId = OLD_PROJECT_IDS[i];
+            idMap[oldId] = dp.id;
+            return { ...dp };
+        });
+
+        // Update card references across all columns
+        let cardsUpdated = false;
+        for (const column of ['ideas', 'progress', 'done', 'archived']) {
+            boards[column].forEach(card => {
+                if (card.project && idMap[card.project]) {
+                    card.project = idMap[card.project];
+                    cardsUpdated = true;
+                }
+            });
+        }
+
+        // Save everything
+        saveProjects();
+        if (cardsUpdated) {
+            saveToFirestore();
+        }
+        console.log('Migrated old hardcoded projects to generic defaults');
     }
-    
+}
+
+async function saveProjects() {
     if (!isFirebaseReady) return;
-    
+
     try {
         const db = window.firebaseDB;
         const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'projects');
-        
-        // Ensure order is sequential before saving
-        boardProjects.forEach((p, i) => p.order = i);
-        
+
         await window.firebaseSetDoc(configRef, {
             list: boardProjects,
             updatedAt: new Date().toISOString()
@@ -171,28 +222,28 @@ async function saveProjects() {
 
 function setupProjectSync() {
     if (!isFirebaseReady) return;
-    
+
     const db = window.firebaseDB;
     const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'projects');
-    
+
     window.firebaseOnSnapshot(configRef, (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.data();
-            const incoming = (data.list || []).map((p, i) => ({
-                id: p.id,
-                name: p.name || p.id,
-                emoji: p.emoji || '📁',
-                color: p.color || '#48bb78',
-                order: p.order !== undefined ? p.order : i,
-                archived: p.archived || false
-            }));
-            incoming.sort((a, b) => a.order - b.order);
-            
-            if (JSON.stringify(boardProjects) !== JSON.stringify(incoming)) {
-                boardProjects = incoming;
+            const newList = data.list || [];
+
+            if (JSON.stringify(boardProjects) !== JSON.stringify(newList)) {
+                boardProjects = newList.map((p, i) => ({
+                    id: p.id,
+                    name: p.name || p.id,
+                    emoji: p.emoji || '📁',
+                    color: p.color || '#48bb78',
+                    order: p.order !== undefined ? p.order : i,
+                    archived: p.archived || false
+                }));
+                boardProjects.sort((a, b) => a.order - b.order);
                 populateProjectDropdowns();
                 renderAllColumns();
-                // Refresh project modal if open
+                // Refresh modal if open
                 if (document.getElementById('projectModal').classList.contains('active')) {
                     renderProjectList();
                 }
@@ -202,79 +253,62 @@ function setupProjectSync() {
 }
 
 // ============================================
-// POPULATE DROPDOWNS DYNAMICALLY
+// PROJECT HELPERS
 // ============================================
 
-function populateProjectDropdowns() {
-    const filterSelect = document.getElementById('projectFilter');
-    const cardSelect = document.getElementById('cardProject');
-    
-    // Save current selections
-    const currentFilterVal = filterSelect.value;
-    const currentCardVal = cardSelect ? cardSelect.value : '';
-    
-    // Clear all options except "All Projects" / "None"
-    filterSelect.innerHTML = '<option value="">All Projects</option>';
-    cardSelect.innerHTML = '<option value="">None</option>';
-    
-    // Add active (non-archived) projects
-    const activeProjects = boardProjects.filter(p => !p.archived);
-    
-    activeProjects.forEach(project => {
-        // Filter dropdown
-        const filterOpt = document.createElement('option');
-        filterOpt.value = project.id;
-        filterOpt.textContent = `${project.emoji} ${project.name}`;
-        filterSelect.appendChild(filterOpt);
-        
-        // Card modal dropdown
-        const cardOpt = document.createElement('option');
-        cardOpt.value = project.id;
-        cardOpt.textContent = `${project.emoji} ${project.name}`;
-        cardSelect.appendChild(cardOpt);
-    });
-    
-    // Restore selections
-    filterSelect.value = currentFilterVal;
-    if (cardSelect) cardSelect.value = currentCardVal;
+function getProject(id) {
+    return boardProjects.find(p => p.id === id) || null;
 }
 
-// ============================================
-// PROJECT LOOKUP HELPER
-// ============================================
-
-function getProject(projectId) {
-    if (!projectId) return null;
-    return boardProjects.find(p => p.id === projectId) || null;
-}
-
-function getProjectLabel(projectId) {
-    const proj = getProject(projectId);
-    if (proj) return `${proj.emoji} ${proj.name}`;
-    // Fallback for cards with project ids that no longer exist
-    return projectId;
-}
-
-function getProjectColor(projectId) {
-    const proj = getProject(projectId);
-    return proj ? proj.color : null;
+function getProjectColor(id) {
+    const p = getProject(id);
+    return p ? p.color : null;
 }
 
 function getCardCountForProject(projectId) {
     let count = 0;
-    for (const col of ['ideas', 'progress', 'done']) {
-        count += boards[col].filter(c => c.project === projectId).length;
+    for (const column of ['ideas', 'progress', 'done']) {
+        count += boards[column].filter(c => c.project === projectId).length;
     }
     return count;
 }
 
+function populateProjectDropdowns() {
+    const activeProjects = boardProjects.filter(p => !p.archived);
+
+    // Header filter dropdown
+    const filterSelect = document.getElementById('projectFilter');
+    const currentFilter = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">All Projects</option>';
+    activeProjects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.emoji} ${p.name}`;
+        filterSelect.appendChild(opt);
+    });
+    filterSelect.value = currentFilter;
+
+    // Card modal project dropdown
+    const cardProject = document.getElementById('cardProject');
+    const currentProject = cardProject.value;
+    cardProject.innerHTML = '<option value="">None</option>';
+    activeProjects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.emoji} ${p.name}`;
+        cardProject.appendChild(opt);
+    });
+    cardProject.value = currentProject;
+}
+
 // ============================================
-// PROJECT MANAGEMENT MODAL
+// PROJECT MANAGEMENT MODAL — REDESIGNED
 // ============================================
 
 function openProjectModal() {
     const modal = document.getElementById('projectModal');
     renderProjectList();
+    renderAddProjectBar();
     updateProjectCountInfo();
     modal.classList.add('active');
 }
@@ -282,120 +316,106 @@ function openProjectModal() {
 function closeProjectModal() {
     const modal = document.getElementById('projectModal');
     modal.classList.remove('active');
-    // Close emoji picker if open
-    document.getElementById('emojiPicker').style.display = 'none';
+    closeEmojiPopover();
+    closeAllContextMenus();
 }
 
 function updateProjectCountInfo() {
     const total = boardProjects.length;
     const active = boardProjects.filter(p => !p.archived).length;
     const el = document.getElementById('projectCountInfo');
-    el.textContent = `${active} active project${active !== 1 ? 's' : ''}${total !== active ? ` (${total - active} archived)` : ''}`;
+    el.textContent = `${active} project${active !== 1 ? 's' : ''}${total !== active ? ` · ${total - active} archived` : ''}`;
 }
 
 function renderProjectList() {
     const listEl = document.getElementById('projectList');
     listEl.innerHTML = '';
-    
+
     if (boardProjects.length === 0) {
         listEl.innerHTML = '<p class="empty-state">No projects yet. Add one below!</p>';
         return;
     }
-    
-    // Render active projects first, then archived
-    const sorted = [...boardProjects].sort((a, b) => {
-        if (a.archived !== b.archived) return a.archived ? 1 : -1;
-        return a.order - b.order;
+
+    const activeProjects = boardProjects.filter(p => !p.archived).sort((a, b) => a.order - b.order);
+    const archivedProjects = boardProjects.filter(p => p.archived);
+
+    activeProjects.forEach(project => {
+        const row = createProjectRow(project);
+        listEl.appendChild(row);
     });
-    
-    sorted.forEach(project => {
-        const item = createProjectItemElement(project);
-        listEl.appendChild(item);
-    });
-    
+
+    if (archivedProjects.length > 0) {
+        const label = document.createElement('div');
+        label.className = 'project-section-label';
+        label.textContent = `Archived (${archivedProjects.length})`;
+        listEl.appendChild(label);
+
+        archivedProjects.forEach(project => {
+            const row = createProjectRow(project);
+            listEl.appendChild(row);
+        });
+    }
+
     updateProjectCountInfo();
 }
 
-function createProjectItemElement(project) {
+function createProjectRow(project) {
     const div = document.createElement('div');
-    div.className = `project-item${project.archived ? ' archived-project' : ''}`;
+    div.className = `project-row${project.archived ? ' is-archived' : ''}`;
     div.dataset.projectId = project.id;
     div.draggable = !project.archived;
-    
-    // Drag handle
-    const handle = document.createElement('span');
-    handle.className = 'project-drag-handle';
-    handle.textContent = '⋮⋮';
-    div.appendChild(handle);
-    
-    // Color dot
-    const colorDot = document.createElement('span');
-    colorDot.className = 'project-color-dot';
-    colorDot.style.backgroundColor = project.color;
-    div.appendChild(colorDot);
-    
+
+    // Color stripe
+    const color = document.createElement('div');
+    color.className = 'pr-color';
+    color.style.backgroundColor = project.color;
+    div.appendChild(color);
+
     // Emoji
     const emoji = document.createElement('span');
-    emoji.className = 'project-emoji';
+    emoji.className = 'pr-emoji';
     emoji.textContent = project.emoji;
     div.appendChild(emoji);
-    
+
     // Name
     const name = document.createElement('span');
-    name.className = 'project-item-name';
+    name.className = 'pr-name';
     name.textContent = project.name;
     div.appendChild(name);
-    
+
     // Card count
     const count = getCardCountForProject(project.id);
-    const countBadge = document.createElement('span');
-    countBadge.className = 'project-card-count';
-    countBadge.textContent = `${count} card${count !== 1 ? 's' : ''}`;
-    div.appendChild(countBadge);
-    
-    // Actions
-    const actions = document.createElement('div');
-    actions.className = 'project-item-actions';
-    
-    // Edit button
-    const editBtn = document.createElement('button');
-    editBtn.className = 'project-action-btn';
-    editBtn.textContent = '✏️';
-    editBtn.title = 'Edit project';
-    editBtn.onclick = (e) => { e.stopPropagation(); startEditProject(project.id); };
-    actions.appendChild(editBtn);
-    
-    // Archive/Unarchive button
-    const archiveBtn = document.createElement('button');
-    archiveBtn.className = 'project-action-btn';
-    archiveBtn.textContent = project.archived ? '📤' : '📥';
-    archiveBtn.title = project.archived ? 'Restore project' : 'Archive project';
-    archiveBtn.onclick = (e) => { e.stopPropagation(); toggleArchiveProject(project.id); };
-    actions.appendChild(archiveBtn);
-    
-    // Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'project-action-btn';
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.title = 'Delete project';
-    deleteBtn.onclick = (e) => { e.stopPropagation(); deleteProject(project.id); };
-    actions.appendChild(deleteBtn);
-    
-    div.appendChild(actions);
-    
-    // Drag events for reordering
+    if (count > 0) {
+        const countEl = document.createElement('span');
+        countEl.className = 'pr-count';
+        countEl.textContent = count;
+        div.appendChild(countEl);
+    }
+
+    // ··· menu button
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'pr-menu-btn';
+    menuBtn.textContent = '···';
+    menuBtn.title = 'Options';
+    menuBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleContextMenu(project.id, menuBtn);
+    };
+    div.appendChild(menuBtn);
+
+    // Drag events for reordering (active projects only)
     if (!project.archived) {
         div.addEventListener('dragstart', (e) => {
             div.classList.add('dragging-project');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', project.id);
         });
-        
+
         div.addEventListener('dragend', () => {
             div.classList.remove('dragging-project');
-            document.querySelectorAll('.project-item').forEach(el => el.classList.remove('drag-over-project'));
+            document.querySelectorAll('.project-row').forEach(el => el.classList.remove('drag-over-project'));
         });
-        
+
         div.addEventListener('dragover', (e) => {
             e.preventDefault();
             const dragging = document.querySelector('.dragging-project');
@@ -403,146 +423,177 @@ function createProjectItemElement(project) {
                 div.classList.add('drag-over-project');
             }
         });
-        
+
         div.addEventListener('dragleave', () => {
             div.classList.remove('drag-over-project');
         });
-        
+
         div.addEventListener('drop', (e) => {
             e.preventDefault();
             div.classList.remove('drag-over-project');
             const draggedId = e.dataTransfer.getData('text/plain');
-            const targetId = project.id;
-            if (draggedId !== targetId) {
-                reorderProject(draggedId, targetId);
+            if (draggedId !== project.id) {
+                reorderProject(draggedId, project.id);
             }
         });
     }
-    
+
     return div;
 }
 
 // ============================================
-// PROJECT CRUD OPERATIONS
+// CONTEXT MENU (three-dot menu per project)
 // ============================================
 
-function addProject() {
-    const nameInput = document.getElementById('newProjectName');
-    const colorInput = document.getElementById('newProjectColor');
-    const name = nameInput.value.trim();
-    
-    if (!name) {
-        nameInput.focus();
+function toggleContextMenu(projectId, anchorBtn) {
+    closeAllContextMenus();
+
+    if (openContextMenuId === projectId) {
+        openContextMenuId = null;
         return;
     }
-    
-    // Generate a slug-style ID
-    const id = name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-        + '-' + Date.now().toString(36);
-    
-    const newProject = {
-        id,
-        name,
-        emoji: selectedEmoji,
-        color: colorInput.value,
-        order: boardProjects.filter(p => !p.archived).length,
-        archived: false
-    };
-    
-    boardProjects.push(newProject);
-    saveProjects();
-    populateProjectDropdowns();
-    renderProjectList();
-    renderAllColumns();
-    
-    // Reset inputs
-    nameInput.value = '';
-    selectedEmoji = '📁';
-    document.getElementById('projectEmojiBtn').textContent = '📁';
-    document.getElementById('emojiPicker').style.display = 'none';
-    nameInput.focus();
+
+    openContextMenuId = projectId;
+    const project = getProject(projectId);
+    if (!project) return;
+
+    const menu = document.createElement('div');
+    menu.className = 'pr-context-menu';
+    menu.dataset.menuFor = projectId;
+
+    // Edit
+    const editItem = document.createElement('button');
+    editItem.className = 'pr-context-item';
+    editItem.innerHTML = '✏️ <span>Edit</span>';
+    editItem.onclick = (e) => { e.stopPropagation(); closeAllContextMenus(); startEditProject(projectId); };
+    menu.appendChild(editItem);
+
+    // Archive / Restore
+    const archiveItem = document.createElement('button');
+    archiveItem.className = 'pr-context-item';
+    archiveItem.innerHTML = project.archived ? '📤 <span>Restore</span>' : '📥 <span>Archive</span>';
+    archiveItem.onclick = (e) => { e.stopPropagation(); closeAllContextMenus(); toggleArchiveProject(projectId); };
+    menu.appendChild(archiveItem);
+
+    // Delete
+    const deleteItem = document.createElement('button');
+    deleteItem.className = 'pr-context-item danger';
+    deleteItem.innerHTML = '🗑️ <span>Delete</span>';
+    deleteItem.onclick = (e) => { e.stopPropagation(); closeAllContextMenus(); deleteProject(projectId); };
+    menu.appendChild(deleteItem);
+
+    // Position the menu next to the button's parent row
+    const row = anchorBtn.closest('.project-row');
+    row.style.position = 'relative';
+    row.appendChild(menu);
 }
+
+function closeAllContextMenus() {
+    document.querySelectorAll('.pr-context-menu').forEach(el => el.remove());
+    openContextMenuId = null;
+}
+
+// ============================================
+// EXPAND-TO-EDIT
+// ============================================
 
 function startEditProject(projectId) {
     const project = getProject(projectId);
     if (!project) return;
-    
-    const itemEl = document.querySelector(`.project-item[data-project-id="${projectId}"]`);
-    if (!itemEl) return;
-    
-    // Replace name span with input
-    const nameEl = itemEl.querySelector('.project-item-name');
-    const emojiEl = itemEl.querySelector('.project-emoji');
-    const colorDot = itemEl.querySelector('.project-color-dot');
-    
-    // Name input
+
+    const row = document.querySelector(`.project-row[data-project-id="${projectId}"]`);
+    if (!row) return;
+
+    let editEmoji = project.emoji;
+    let editColor = project.color;
+
+    // Create edit form
+    const editDiv = document.createElement('div');
+    editDiv.className = 'project-edit-expanded';
+    editDiv.dataset.projectId = projectId;
+
+    // Top row: emoji, name input, save/cancel
+    const topRow = document.createElement('div');
+    topRow.className = 'pe-top-row';
+
+    const emojiBtn = document.createElement('button');
+    emojiBtn.type = 'button';
+    emojiBtn.className = 'pe-emoji-btn';
+    emojiBtn.textContent = editEmoji;
+    emojiBtn.onclick = (e) => {
+        e.stopPropagation();
+        showEmojiPopover(emojiBtn, (emoji) => {
+            editEmoji = emoji;
+            emojiBtn.textContent = emoji;
+        });
+    };
+    topRow.appendChild(emojiBtn);
+
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
-    nameInput.className = 'project-edit-input';
+    nameInput.className = 'pe-name-input';
     nameInput.value = project.name;
     nameInput.maxLength = 40;
-    nameEl.replaceWith(nameInput);
-    
-    // Color picker
-    const colorPicker = document.createElement('input');
-    colorPicker.type = 'color';
-    colorPicker.className = 'project-color-edit';
-    colorPicker.value = project.color;
-    colorDot.replaceWith(colorPicker);
-    
-    // Make emoji clickable to change
-    let currentEditEmoji = project.emoji;
-    emojiEl.style.cursor = 'pointer';
-    emojiEl.title = 'Click to change emoji';
-    emojiEl.onclick = () => {
-        // Simple prompt for emoji change during edit
-        const newEmoji = prompt('Enter an emoji:', currentEditEmoji);
-        if (newEmoji && newEmoji.trim()) {
-            currentEditEmoji = newEmoji.trim().substring(0, 2);
-            emojiEl.textContent = currentEditEmoji;
-        }
-    };
-    
-    // Replace action buttons with Save/Cancel
-    const actionsEl = itemEl.querySelector('.project-item-actions');
-    actionsEl.innerHTML = '';
-    actionsEl.style.opacity = '1';
-    
+    topRow.appendChild(nameInput);
+
+    const actions = document.createElement('div');
+    actions.className = 'pe-actions';
+
     const saveBtn = document.createElement('button');
-    saveBtn.className = 'project-action-btn';
-    saveBtn.textContent = '✅';
-    saveBtn.title = 'Save';
-    saveBtn.onclick = (e) => {
-        e.stopPropagation();
+    saveBtn.type = 'button';
+    saveBtn.className = 'pe-save-btn';
+    saveBtn.textContent = 'Save';
+    saveBtn.onclick = () => {
         const newName = nameInput.value.trim();
-        if (newName) {
-            project.name = newName;
-            project.color = colorPicker.value;
-            project.emoji = currentEditEmoji;
-            saveProjects();
-            populateProjectDropdowns();
-            renderProjectList();
-            renderAllColumns();
-        }
-    };
-    
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'project-action-btn';
-    cancelBtn.textContent = '❌';
-    cancelBtn.title = 'Cancel';
-    cancelBtn.onclick = (e) => {
-        e.stopPropagation();
+        if (!newName) { nameInput.focus(); return; }
+        project.name = newName;
+        project.emoji = editEmoji;
+        project.color = editColor;
+        saveProjects();
+        populateProjectDropdowns();
         renderProjectList();
+        renderAllColumns();
     };
-    
-    actionsEl.appendChild(saveBtn);
-    actionsEl.appendChild(cancelBtn);
-    
+    actions.appendChild(saveBtn);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'pe-cancel-btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = () => renderProjectList();
+    actions.appendChild(cancelBtn);
+
+    topRow.appendChild(actions);
+    editDiv.appendChild(topRow);
+
+    // Color swatches row
+    const colorRow = document.createElement('div');
+    colorRow.className = 'pe-color-row';
+
+    const colorLabel = document.createElement('span');
+    colorLabel.className = 'pe-color-row-label';
+    colorLabel.textContent = 'Color';
+    colorRow.appendChild(colorLabel);
+
+    COLOR_PALETTE.forEach(c => {
+        const swatch = document.createElement('div');
+        swatch.className = `color-swatch${c === editColor ? ' selected' : ''}`;
+        swatch.style.backgroundColor = c;
+        swatch.onclick = () => {
+            editColor = c;
+            colorRow.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+            swatch.classList.add('selected');
+        };
+        colorRow.appendChild(swatch);
+    });
+
+    editDiv.appendChild(colorRow);
+
+    // Replace row with edit form
+    row.replaceWith(editDiv);
     nameInput.focus();
     nameInput.select();
-    
+
     // Enter to save, Escape to cancel
     nameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') saveBtn.click();
@@ -550,132 +601,164 @@ function startEditProject(projectId) {
     });
 }
 
+// ============================================
+// PROJECT CRUD OPERATIONS
+// ============================================
+
+function renderAddProjectBar() {
+    const swatchContainer = document.getElementById('addColorSwatches');
+    swatchContainer.innerHTML = '';
+
+    const quickColors = COLOR_PALETTE.slice(0, 6);
+    quickColors.forEach(c => {
+        const swatch = document.createElement('div');
+        swatch.className = `color-swatch${c === selectedAddColor ? ' selected' : ''}`;
+        swatch.style.backgroundColor = c;
+        swatch.onclick = () => {
+            selectedAddColor = c;
+            swatchContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+            swatch.classList.add('selected');
+        };
+        swatchContainer.appendChild(swatch);
+    });
+}
+
+function addProject() {
+    const nameInput = document.getElementById('newProjectName');
+    const name = nameInput.value.trim();
+
+    if (!name) {
+        nameInput.focus();
+        return;
+    }
+
+    const id = name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        + '-' + Date.now().toString(36);
+
+    const newProject = {
+        id,
+        name,
+        emoji: selectedAddEmoji,
+        color: selectedAddColor,
+        order: boardProjects.filter(p => !p.archived).length,
+        archived: false
+    };
+
+    boardProjects.push(newProject);
+    saveProjects();
+    populateProjectDropdowns();
+    renderProjectList();
+    renderAllColumns();
+
+    // Reset inputs
+    nameInput.value = '';
+    selectedAddEmoji = '📁';
+    document.getElementById('projectEmojiBtn').textContent = '📁';
+    nameInput.focus();
+}
+
 function toggleArchiveProject(projectId) {
     const project = getProject(projectId);
     if (!project) return;
-    
-    if (!project.archived) {
-        const count = getCardCountForProject(projectId);
-        const msg = count > 0
-            ? `Archive "${project.name}"? It has ${count} card(s). Cards will keep this project tag but it won't appear in dropdowns.`
-            : `Archive "${project.name}"?`;
-        if (!confirm(msg)) return;
-    }
-    
+
     project.archived = !project.archived;
     saveProjects();
     populateProjectDropdowns();
     renderProjectList();
-    
-    // If currently filtering by this project, reset filter
-    if (activeFilter === projectId && project.archived) {
-        activeFilter = '';
-        document.getElementById('projectFilter').value = '';
-        renderAllColumns();
-        updateAllCounts();
-    }
 }
 
 function deleteProject(projectId) {
     const project = getProject(projectId);
     if (!project) return;
-    
+
     const count = getCardCountForProject(projectId);
-    let msg = `Permanently delete "${project.name}"?`;
-    if (count > 0) {
-        msg += `\n\n⚠️ ${count} card(s) use this project. They'll lose their project tag.`;
-    }
-    
+    const msg = count > 0
+        ? `Delete "${project.name}"? ${count} card${count > 1 ? 's' : ''} will lose their project tag.`
+        : `Delete "${project.name}"?`;
+
     if (!confirm(msg)) return;
-    
-    // Remove project tag from all cards
-    if (count > 0) {
-        for (const col of ['ideas', 'progress', 'done', 'archived']) {
-            boards[col].forEach(card => {
-                if (card.project === projectId) {
-                    card.project = '';
-                }
-            });
-        }
-        saveToFirestore();
+
+    // Clear project from all cards
+    for (const column of ['ideas', 'progress', 'done', 'archived']) {
+        boards[column].forEach(card => {
+            if (card.project === projectId) {
+                card.project = '';
+            }
+        });
     }
-    
+
     boardProjects = boardProjects.filter(p => p.id !== projectId);
     saveProjects();
+    saveToFirestore();
     populateProjectDropdowns();
     renderProjectList();
     renderAllColumns();
-    updateAllCounts();
-    
-    // Reset filter if needed
-    if (activeFilter === projectId) {
-        activeFilter = '';
-        document.getElementById('projectFilter').value = '';
-    }
 }
 
 function reorderProject(draggedId, targetId) {
     const activeProjects = boardProjects.filter(p => !p.archived);
     const draggedIdx = activeProjects.findIndex(p => p.id === draggedId);
     const targetIdx = activeProjects.findIndex(p => p.id === targetId);
-    
+
     if (draggedIdx === -1 || targetIdx === -1) return;
-    
-    // Remove dragged from active list
+
     const [dragged] = activeProjects.splice(draggedIdx, 1);
-    // Insert at target position
     activeProjects.splice(targetIdx, 0, dragged);
-    
+
     // Update order values
-    activeProjects.forEach((p, i) => p.order = i);
-    
-    // Rebuild full list: active (reordered) + archived
-    const archivedProjects = boardProjects.filter(p => p.archived);
-    boardProjects = [...activeProjects, ...archivedProjects];
-    
+    activeProjects.forEach((p, i) => { p.order = i; });
+
     saveProjects();
-    populateProjectDropdowns();
     renderProjectList();
+    populateProjectDropdowns();
 }
 
 // ============================================
-// EMOJI PICKER
+// EMOJI POPOVER
 // ============================================
 
-function toggleEmojiPicker() {
-    const picker = document.getElementById('emojiPicker');
-    
-    if (picker.style.display === 'none' || !picker.style.display) {
-        // Build picker grid
-        picker.innerHTML = '';
-        const grid = document.createElement('div');
-        grid.className = 'emoji-picker-grid';
-        
-        EMOJI_OPTIONS.forEach(emoji => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = `emoji-option${emoji === selectedEmoji ? ' selected' : ''}`;
-            btn.textContent = emoji;
-            btn.onclick = () => {
-                selectedEmoji = emoji;
-                document.getElementById('projectEmojiBtn').textContent = emoji;
-                // Update selected state
-                grid.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-                btn.classList.add('selected');
-                picker.style.display = 'none';
-            };
-            grid.appendChild(btn);
-        });
-        
-        picker.appendChild(grid);
-        picker.style.display = 'block';
-    } else {
-        picker.style.display = 'none';
+function showEmojiPopover(anchorEl, onSelect) {
+    const popover = document.getElementById('emojiPickerPopover');
+    popover.innerHTML = '';
+    popover.classList.add('visible');
+
+    const grid = document.createElement('div');
+    grid.className = 'emoji-popover-grid';
+
+    EMOJI_OPTIONS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = emoji;
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            onSelect(emoji);
+            closeEmojiPopover();
+        };
+        grid.appendChild(btn);
+    });
+
+    popover.appendChild(grid);
+
+    // Position near anchor
+    const modalBody = document.querySelector('.project-modal-body');
+    const anchorRect = anchorEl.getBoundingClientRect();
+    const modalRect = modalBody.getBoundingClientRect();
+
+    popover.style.left = (anchorRect.left - modalRect.left) + 'px';
+    popover.style.top = (anchorRect.bottom - modalRect.top + 4) + 'px';
+}
+
+function closeEmojiPopover() {
+    const popover = document.getElementById('emojiPickerPopover');
+    if (popover) {
+        popover.classList.remove('visible');
     }
 }
 
 // ============================================
-// FIRESTORE FUNCTIONS (existing, preserved)
+// FIRESTORE FUNCTIONS
 // ============================================
 
 async function loadFromFirestore() {
@@ -690,20 +773,20 @@ async function loadFromFirestore() {
             console.error('Failed to load demo data:', err);
         }
     }
-    
+
     if (!isFirebaseReady) return;
-    
+
     try {
         const db = window.firebaseDB;
         const boardsRef = window.firebaseCollection(db, boardCollectionName);
-        
+
         for (const column of ['ideas', 'progress', 'done', 'archived']) {
             const colRef = window.firebaseDoc(boardsRef, column);
-            
+
             const snapshot = await new Promise((resolve) => {
                 window.firebaseOnSnapshot(colRef, resolve, { includeMetadataChanges: false });
             });
-            
+
             if (snapshot.exists()) {
                 const data = snapshot.data();
                 boards[column] = data.cards || [];
@@ -717,18 +800,18 @@ async function loadFromFirestore() {
 
 function setupFirestoreSync() {
     if (!isFirebaseReady) return;
-    
+
     const db = window.firebaseDB;
     const boardsRef = window.firebaseCollection(db, boardCollectionName);
-    
+
     for (const column of ['ideas', 'progress', 'done', 'archived']) {
         const colRef = window.firebaseDoc(boardsRef, column);
-        
+
         window.firebaseOnSnapshot(colRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.data();
                 const newCards = data.cards || [];
-                
+
                 if (JSON.stringify(boards[column]) !== JSON.stringify(newCards)) {
                     boards[column] = newCards;
                     if (column !== 'archived') {
@@ -747,17 +830,17 @@ async function saveToFirestore() {
         saveToLocalStorage();
         return;
     }
-    
+
     if (!isFirebaseReady) {
         console.warn('Firebase not ready, saving to localStorage');
         saveToLocalStorage();
         return;
     }
-    
+
     try {
         const db = window.firebaseDB;
         const boardsRef = window.firebaseCollection(db, boardCollectionName);
-        
+
         for (const column of ['ideas', 'progress', 'done', 'archived']) {
             const colRef = window.firebaseDoc(boardsRef, column);
             await window.firebaseSetDoc(colRef, {
@@ -765,7 +848,7 @@ async function saveToFirestore() {
                 updatedAt: new Date().toISOString()
             });
         }
-        
+
         saveToLocalStorage();
     } catch (err) {
         console.error('Firestore save failed:', err);
@@ -776,18 +859,18 @@ async function saveToFirestore() {
 // Board Config Functions
 async function loadBoardConfig() {
     if (!isFirebaseReady) return;
-    
+
     try {
         const db = window.firebaseDB;
         const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
-        
+
         const snapshot = await new Promise((resolve) => {
             window.firebaseOnSnapshot(configRef, resolve, { includeMetadataChanges: false });
         });
-        
+
         if (snapshot.exists()) {
             const data = snapshot.data();
-            boardConfig.name = data.name || "🦊 MJ's Project Board";
+            boardConfig.name = data.name || boardConfig.name;
         }
     } catch (err) {
         console.warn('Failed to load board config:', err);
@@ -796,11 +879,11 @@ async function loadBoardConfig() {
 
 async function saveBoardConfig() {
     if (!isFirebaseReady) return;
-    
+
     try {
         const db = window.firebaseDB;
         const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
-        
+
         await window.firebaseSetDoc(configRef, {
             name: boardConfig.name,
             updatedAt: new Date().toISOString()
@@ -812,10 +895,10 @@ async function saveBoardConfig() {
 
 function setupBoardConfigSync() {
     if (!isFirebaseReady) return;
-    
+
     const db = window.firebaseDB;
     const configRef = window.firebaseDoc(window.firebaseCollection(db, boardCollectionName), 'config');
-    
+
     window.firebaseOnSnapshot(configRef, (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.data();
@@ -883,29 +966,36 @@ function setupEventListeners() {
     document.getElementById('closeArchive').addEventListener('click', closeArchiveModal);
     document.getElementById('closeArchiveBtn').addEventListener('click', closeArchiveModal);
 
-    // Project management modal
+    // Click outside modal to close
+    document.getElementById('cardModal').addEventListener('click', (e) => {
+        if (e.target.id === 'cardModal') closeModal();
+    });
+
+    document.getElementById('archiveModal').addEventListener('click', (e) => {
+        if (e.target.id === 'archiveModal') closeArchiveModal();
+    });
+
+    // Project Management Modal
     document.getElementById('manageProjectsBtn').addEventListener('click', openProjectModal);
     document.getElementById('closeProjectModal').addEventListener('click', closeProjectModal);
     document.getElementById('closeProjectModalBtn').addEventListener('click', closeProjectModal);
+    document.getElementById('projectModal').addEventListener('click', (e) => {
+        if (e.target.id === 'projectModal') closeProjectModal();
+    });
+
+    // Add project
     document.getElementById('addProjectBtn').addEventListener('click', addProject);
-    document.getElementById('projectEmojiBtn').addEventListener('click', toggleEmojiPicker);
-    
-    // Enter key to add project
     document.getElementById('newProjectName').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') addProject();
     });
 
-    // Click outside modals to close
-    document.getElementById('cardModal').addEventListener('click', (e) => {
-        if (e.target.id === 'cardModal') closeModal();
-    });
-    
-    document.getElementById('archiveModal').addEventListener('click', (e) => {
-        if (e.target.id === 'archiveModal') closeArchiveModal();
-    });
-    
-    document.getElementById('projectModal').addEventListener('click', (e) => {
-        if (e.target.id === 'projectModal') closeProjectModal();
+    // Emoji picker for add bar
+    document.getElementById('projectEmojiBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showEmojiPopover(e.target, (emoji) => {
+            selectedAddEmoji = emoji;
+            document.getElementById('projectEmojiBtn').textContent = emoji;
+        });
     });
 
     // Search
@@ -961,7 +1051,7 @@ function setupEventListeners() {
 }
 
 // ============================================
-// CARD MODAL FUNCTIONS
+// CARD MODAL
 // ============================================
 
 function openModal(column, card = null) {
@@ -979,9 +1069,6 @@ function openModal(column, card = null) {
     currentCard = column;
     editingCard = card;
     selectedLabels = card ? (card.labels || []) : [];
-
-    // Refresh project dropdown in case projects changed
-    populateProjectDropdowns();
 
     // Update label buttons
     document.querySelectorAll('.label-btn').forEach(btn => {
@@ -1072,7 +1159,7 @@ function saveCard() {
 function deleteCard() {
     if (!confirm('Delete this card permanently?')) return;
 
-    const column = Object.keys(boards).find(col => 
+    const column = Object.keys(boards).find(col =>
         boards[col].some(card => card === editingCard)
     );
 
@@ -1088,7 +1175,7 @@ function deleteCard() {
 function archiveCard() {
     if (!confirm('Archive this card?')) return;
 
-    const column = Object.keys(boards).find(col => 
+    const column = Object.keys(boards).find(col =>
         boards[col].some(card => card === editingCard)
     );
 
@@ -1096,7 +1183,7 @@ function archiveCard() {
         boards[column] = boards[column].filter(card => card !== editingCard);
         editingCard.archivedAt = new Date().toISOString();
         boards.archived.push(editingCard);
-        
+
         saveToFirestore();
         renderColumn(column);
         updateCount(column);
@@ -1111,9 +1198,9 @@ function archiveCard() {
 function showArchiveModal() {
     const modal = document.getElementById('archiveModal');
     const listEl = document.getElementById('archiveList');
-    
+
     listEl.innerHTML = '';
-    
+
     if (boards.archived.length === 0) {
         listEl.innerHTML = '<p class="empty-state">No archived cards</p>';
     } else {
@@ -1122,7 +1209,7 @@ function showArchiveModal() {
             listEl.appendChild(cardEl);
         });
     }
-    
+
     modal.classList.add('active');
 }
 
@@ -1134,40 +1221,40 @@ function closeArchiveModal() {
 function createArchiveCardElement(card) {
     const div = document.createElement('div');
     div.className = 'archive-card';
-    
+
     const title = document.createElement('div');
     title.className = 'archive-card-title';
     title.textContent = card.title;
     div.appendChild(title);
-    
+
     const actions = document.createElement('div');
     actions.className = 'archive-card-actions';
-    
+
     const restoreBtn = document.createElement('button');
     restoreBtn.textContent = '↩️ Restore';
     restoreBtn.className = 'btn-secondary btn-small';
     restoreBtn.onclick = () => restoreCard(card);
-    
+
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '🗑️ Delete';
     deleteBtn.className = 'btn-danger btn-small';
     deleteBtn.onclick = () => deleteArchivedCard(card);
-    
+
     actions.appendChild(restoreBtn);
     actions.appendChild(deleteBtn);
     div.appendChild(actions);
-    
+
     return div;
 }
 
 function restoreCard(card) {
     if (!confirm('Restore this card to Ideas?')) return;
-    
+
     boards.archived = boards.archived.filter(c => c !== card);
     delete card.archivedAt;
     card.movedToColumnAt = new Date().toISOString();
     boards.ideas.push(card);
-    
+
     saveToFirestore();
     renderColumn('ideas');
     updateCount('ideas');
@@ -1176,7 +1263,7 @@ function restoreCard(card) {
 
 function deleteArchivedCard(card) {
     if (!confirm('Permanently delete this card?')) return;
-    
+
     boards.archived = boards.archived.filter(c => c !== card);
     saveToFirestore();
     showArchiveModal();
@@ -1195,13 +1282,13 @@ function renderColumn(column) {
     container.innerHTML = '';
 
     let filteredCards = boards[column];
-    
+
     if (activeFilter) {
         filteredCards = filteredCards.filter(card => card.project === activeFilter);
     }
-    
+
     if (searchQuery) {
-        filteredCards = filteredCards.filter(card => 
+        filteredCards = filteredCards.filter(card =>
             card.title.toLowerCase().includes(searchQuery) ||
             (card.description && card.description.toLowerCase().includes(searchQuery))
         );
@@ -1221,12 +1308,11 @@ function createCardElement(card, column) {
     div.draggable = true;
     div.dataset.id = card.id;
 
-    // Apply project color stripe
-    const projColor = getProjectColor(card.project);
-    if (projColor) {
-        div.setAttribute('data-project-color', 'true');
-        div.style.setProperty('--card-project-color', projColor);
-        div.style.paddingLeft = '1.25rem'; // Extra padding for the stripe
+    // Project color stripe
+    const projectColor = getProjectColor(card.project);
+    if (projectColor) {
+        div.dataset.projectColor = 'true';
+        div.style.setProperty('--card-project-color', projectColor);
     }
 
     const title = document.createElement('div');
@@ -1244,24 +1330,18 @@ function createCardElement(card, column) {
     // Card badges
     const badges = document.createElement('div');
     badges.className = 'card-badges';
-    
+
     // Labels
     if (card.labels && card.labels.length > 0) {
         card.labels.forEach(label => {
             const labelBadge = document.createElement('span');
             labelBadge.className = `badge badge-label label-${label}`;
-            const labelIcons = {
-                urgent: '🔥',
-                research: '📚',
-                blocked: '🚧',
-                review: '👀',
-                bug: '🐛'
-            };
+            const labelIcons = { urgent: '🔥', research: '📚', blocked: '🚧', review: '👀', bug: '🐛' };
             labelBadge.textContent = labelIcons[label] || label;
             badges.appendChild(labelBadge);
         });
     }
-    
+
     // Due date
     if (card.dueDate) {
         const dueBadge = document.createElement('span');
@@ -1270,15 +1350,15 @@ function createCardElement(card, column) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         dueDate.setHours(0, 0, 0, 0);
-        
+
         const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays < 0) {
             dueBadge.classList.add('overdue');
-            dueBadge.textContent = `⚠️ Overdue`;
+            dueBadge.textContent = '⚠️ Overdue';
         } else if (diffDays === 0) {
             dueBadge.classList.add('due-today');
-            dueBadge.textContent = `📅 Today`;
+            dueBadge.textContent = '📅 Today';
         } else if (diffDays <= 3) {
             dueBadge.classList.add('due-soon');
             dueBadge.textContent = `📅 ${diffDays}d`;
@@ -1287,25 +1367,23 @@ function createCardElement(card, column) {
         }
         badges.appendChild(dueBadge);
     }
-    
-    // Project badge (dynamic lookup)
+
+    // Project badge (dynamic from project data)
     if (card.project) {
+        const project = getProject(card.project);
         const projectBadge = document.createElement('span');
         projectBadge.className = 'badge badge-project';
-        const proj = getProject(card.project);
-        if (proj) {
-            projectBadge.textContent = `${proj.emoji} ${proj.name}`;
-            // Use project color for the badge
-            projectBadge.style.background = proj.color + '1a'; // ~10% opacity
-            projectBadge.style.color = proj.color;
+
+        if (project) {
+            projectBadge.textContent = `${project.emoji} ${project.name}`;
+            projectBadge.style.background = project.color + '18';
+            projectBadge.style.color = project.color;
         } else {
             projectBadge.textContent = card.project;
-            projectBadge.style.background = 'rgba(72, 187, 120, 0.1)';
-            projectBadge.style.color = '#48bb78';
         }
         badges.appendChild(projectBadge);
     }
-    
+
     // Priority badge
     if (card.priority) {
         const priorityBadge = document.createElement('span');
@@ -1314,7 +1392,7 @@ function createCardElement(card, column) {
         priorityBadge.textContent = `${priorityIcons[card.priority]} ${card.priority.toUpperCase()}`;
         badges.appendChild(priorityBadge);
     }
-    
+
     // Effort badge
     if (card.effort) {
         const effortBadge = document.createElement('span');
@@ -1322,7 +1400,7 @@ function createCardElement(card, column) {
         effortBadge.textContent = card.effort;
         badges.appendChild(effortBadge);
     }
-    
+
     // Time in column badge
     if (card.movedToColumnAt) {
         const daysInColumn = calculateDaysInColumn(card.movedToColumnAt);
@@ -1333,15 +1411,13 @@ function createCardElement(card, column) {
             badges.appendChild(timeBadge);
         }
     }
-    
+
     if (badges.children.length > 0) {
         div.appendChild(badges);
     }
 
-    // Click to edit
     div.addEventListener('click', () => openModal(column, card));
 
-    // Drag events
     div.addEventListener('dragstart', (e) => {
         div.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
@@ -1358,13 +1434,11 @@ function createCardElement(card, column) {
 function calculateDaysInColumn(movedAt) {
     const moved = new Date(movedAt);
     const now = new Date();
-    const diffMs = now - moved;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.floor((now - moved) / (1000 * 60 * 60 * 24));
 }
 
 // ============================================
-// DRAG AND DROP (cards between columns)
+// DRAG AND DROP
 // ============================================
 
 function setupDragAndDrop(container, column) {
@@ -1384,11 +1458,9 @@ function setupDragAndDrop(container, column) {
 
         try {
             const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-            if (data.cardId && data.fromColumn) {
-                moveCard(data.cardId, data.fromColumn, column);
-            }
+            moveCard(data.cardId, data.fromColumn, column);
         } catch (err) {
-            // Might be a project reorder drag, ignore
+            console.error('Drop error:', err);
         }
     });
 }
@@ -1417,20 +1489,20 @@ function moveCard(cardId, fromColumn, toColumn) {
 function updateCount(column) {
     const columnEl = document.querySelector(`[data-column="${column}"]`);
     if (!columnEl) return;
-    
+
     const countEl = columnEl.querySelector('.card-count');
-    
+
     let cards = boards[column];
     if (activeFilter) {
         cards = cards.filter(card => card.project === activeFilter);
     }
     if (searchQuery) {
-        cards = cards.filter(card => 
+        cards = cards.filter(card =>
             card.title.toLowerCase().includes(searchQuery) ||
             (card.description && card.description.toLowerCase().includes(searchQuery))
         );
     }
-    
+
     countEl.textContent = cards.length;
 }
 
@@ -1438,10 +1510,7 @@ function updateAllCounts() {
     Object.keys(boards).filter(k => k !== 'archived').forEach(updateCount);
 }
 
-// ============================================
-// DARK MODE
-// ============================================
-
+// Dark mode
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
@@ -1450,24 +1519,26 @@ function toggleDarkMode() {
 }
 
 // ============================================
-// EXPORT / IMPORT
+// EXPORT / IMPORT (with projects)
 // ============================================
 
 function exportData() {
-    const exportPayload = {
+    const exportObj = {
         boards,
         projects: boardProjects,
-        config: boardConfig
+        config: boardConfig,
+        exportedAt: new Date().toISOString()
     };
-    const dataStr = JSON.stringify(exportPayload, null, 2);
+
+    const dataStr = JSON.stringify(exportObj, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
+
     const link = document.createElement('a');
     link.href = url;
-    link.download = `kanban-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `unblocked-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
 }
 
@@ -1479,9 +1550,8 @@ function importData(e) {
     reader.onload = (event) => {
         try {
             const imported = JSON.parse(event.target.result);
-            
+
             if (confirm('This will replace your current board. Continue?')) {
-                // Support both old format (just boards) and new format (boards + projects)
                 if (imported.boards) {
                     boards = imported.boards;
                     if (imported.projects) {
@@ -1491,17 +1561,16 @@ function importData(e) {
                     if (imported.config) {
                         boardConfig = imported.config;
                         saveBoardConfig();
+                        updateBoardTitle();
                     }
                 } else {
-                    // Legacy format: just the boards object
                     boards = imported;
                 }
-                
+
                 saveToFirestore();
                 populateProjectDropdowns();
                 renderAllColumns();
                 updateAllCounts();
-                updateBoardTitle();
             }
         } catch (err) {
             alert('Failed to import: Invalid file format');
@@ -1509,6 +1578,6 @@ function importData(e) {
         }
     };
     reader.readAsText(file);
-    
+
     e.target.value = '';
 }
