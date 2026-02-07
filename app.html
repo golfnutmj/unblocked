@@ -34,12 +34,9 @@
                 <label for="projectFilter">Filter:</label>
                 <select id="projectFilter" class="filter-select">
                     <option value="">All Projects</option>
-                    <option value="earnings-digest">📊 Earnings Digest</option>
-                    <option value="relocation-helper">🌍 Relocation Helper</option>
-                    <option value="photo-journey">📸 PhotoJourney AI</option>
-                    <option value="unblocked">🚀 Unblocked</option>
-                    <option value="other">💡 Other</option>
+                    <!-- Dynamic project options populated by JS -->
                 </select>
+                <button id="manageProjectsBtn" class="btn-icon-small" title="Manage Projects">⚙️</button>
             </div>
             <div class="controls">
                 <button id="showArchiveBtn" class="btn-icon" title="Show Archive">📦</button>
@@ -96,11 +93,7 @@
                         <label>Project</label>
                         <select id="cardProject">
                             <option value="">None</option>
-                            <option value="earnings-digest">📊 Earnings Digest</option>
-                            <option value="relocation-helper">🌍 Relocation Helper</option>
-                            <option value="photo-journey">📸 PhotoJourney AI</option>
-                            <option value="unblocked">🚀 Unblocked</option>
-                            <option value="other">💡 Other</option>
+                            <!-- Dynamic project options populated by JS -->
                         </select>
                     </div>
                     
@@ -167,6 +160,37 @@
             </div>
             <div class="modal-footer">
                 <button id="closeArchiveBtn" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Management Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content project-modal-content">
+            <div class="modal-header">
+                <h3>⚙️ Manage Projects</h3>
+                <button class="close-btn" id="closeProjectModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="project-modal-hint">Drag to reorder. Projects sync across all your devices.</p>
+                <div id="projectList" class="project-list"></div>
+                <div class="add-project-section">
+                    <div class="add-project-row">
+                        <button type="button" id="projectEmojiBtn" class="emoji-picker-btn" title="Pick emoji">📁</button>
+                        <input type="text" id="newProjectName" placeholder="New project name..." maxlength="40" class="project-name-input">
+                        <input type="color" id="newProjectColor" value="#48bb78" class="color-picker-input" title="Project color">
+                        <button id="addProjectBtn" class="btn-primary btn-small">+ Add</button>
+                    </div>
+                    <div id="emojiPicker" class="emoji-picker" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-left-actions">
+                    <span class="project-count-info" id="projectCountInfo"></span>
+                </div>
+                <div class="modal-actions">
+                    <button id="closeProjectModalBtn" class="btn-secondary">Done</button>
+                </div>
             </div>
         </div>
     </div>

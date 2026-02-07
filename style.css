@@ -195,6 +195,20 @@ body {
     padding: 1rem;
     cursor: move;
     transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Project color stripe on cards */
+.card[data-project-color]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--card-project-color, transparent);
+    border-radius: 8px 0 0 8px;
 }
 
 .card:hover {
@@ -538,10 +552,8 @@ body {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Project Badge */
+/* Project Badge - dynamic color variant */
 .badge-project {
-    background: rgba(72, 187, 120, 0.1);
-    color: #48bb78;
     font-weight: 600;
 }
 
@@ -786,5 +798,316 @@ body {
     .archive-card-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+}
+
+
+/* ============================================
+   PROJECT MANAGEMENT STYLES
+   ============================================ */
+
+/* Project Modal */
+.project-modal-content {
+    max-width: 560px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-modal-content .modal-body {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.project-modal-hint {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+/* Project List */
+.project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    cursor: grab;
+    user-select: none;
+}
+
+.project-item:active {
+    cursor: grabbing;
+}
+
+.project-item:hover {
+    border-color: var(--accent);
+}
+
+.project-item.drag-over-project {
+    border-color: var(--accent);
+    background: rgba(102, 126, 234, 0.08);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.project-item.dragging-project {
+    opacity: 0.4;
+    transform: scale(0.98);
+}
+
+.project-item.archived-project {
+    opacity: 0.5;
+    border-style: dashed;
+}
+
+.project-drag-handle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: grab;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+    line-height: 1;
+}
+
+.project-item:hover .project-drag-handle {
+    opacity: 0.8;
+}
+
+.project-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid rgba(0,0,0,0.1);
+}
+
+.project-emoji {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.project-item-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-card-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+.project-item-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.project-item:hover .project-item-actions {
+    opacity: 1;
+}
+
+.project-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.3rem;
+    border-radius: 4px;
+    transition: background 0.15s;
+    line-height: 1;
+}
+
+.project-action-btn:hover {
+    background: var(--bg-secondary);
+}
+
+/* Add Project Section */
+.add-project-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+}
+
+.add-project-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emoji-picker-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.emoji-picker-btn:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+}
+
+.project-name-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.color-picker-input {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.color-picker-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+/* Emoji Picker */
+.emoji-picker {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    animation: fadeIn 0.15s ease;
+}
+
+.emoji-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.25rem;
+}
+
+.emoji-option {
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    background: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s ease;
+}
+
+.emoji-option:hover {
+    background: var(--bg-tertiary);
+    transform: scale(1.2);
+}
+
+.emoji-option.selected {
+    background: rgba(102, 126, 234, 0.15);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Project Count Info */
+.project-count-info {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+/* Inline Edit for Project Name */
+.project-edit-input {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    flex: 1;
+    min-width: 0;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+/* Color edit picker inline */
+.project-color-edit {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 1px;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.project-color-edit::-webkit-color-swatch-wrapper {
+    padding: 1px;
+}
+
+.project-color-edit::-webkit-color-swatch {
+    border: none;
+    border-radius: 3px;
+}
+
+/* Mobile project modal */
+@media (max-width: 768px) {
+    .project-modal-content {
+        max-width: 95%;
+        max-height: 85vh;
+    }
+    
+    .emoji-picker-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .project-item-actions {
+        opacity: 1;
+    }
+    
+    .add-project-row {
+        flex-wrap: wrap;
+    }
+    
+    .project-name-input {
+        flex-basis: 100%;
+        order: -1;
     }
 }
