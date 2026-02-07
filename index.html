@@ -13,6 +13,11 @@
     <!-- App Icons -->
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -21,325 +26,547 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --teal-600: #0d9488;
+            --teal-500: #14b8a6;
+            --teal-400: #2dd4bf;
+            --teal-50: #f0fdfa;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+            --slate-300: #cbd5e1;
+            --slate-100: #f1f5f9;
+            --white: #ffffff;
+            --red-50: #fef2f2;
+            --red-200: #fecaca;
+            --red-700: #b91c1c;
+            --red-900: #7f1d1d;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--white);
             min-height: 100vh;
-            color: #1a1a1a;
+            color: var(--slate-900);
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 3rem 0;
-            color: white;
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        /* ── Navbar ── */
+        .navbar {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 60px;
+            justify-content: space-between;
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--slate-900);
+        }
+
+        .navbar-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-primary {
+            background: var(--teal-500);
+            color: var(--white);
+            box-shadow: 0 2px 10px rgba(20, 184, 166, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: var(--teal-600);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(20, 184, 166, 0.45);
+        }
+
+        .btn-outline {
+            background: var(--white);
+            color: var(--teal-600);
+            border: 1.5px solid var(--slate-300);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--teal-500);
+            background: var(--teal-50);
+            transform: translateY(-1px);
+        }
+
+        .btn-large {
+            padding: 0.9rem 2rem;
+            font-size: 1.05rem;
+            border-radius: 12px;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 3.5rem 2rem 2rem;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .hero-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            box-shadow: 0 8px 30px rgba(20, 184, 166, 0.2);
+            margin: 0 auto 1.75rem;
+            display: block;
         }
 
         .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 800;
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            line-height: 1.15;
+            color: var(--slate-900);
+        }
+
+        .hero h1 span {
+            color: var(--teal-500);
         }
 
         .hero .tagline {
-            font-size: 1.3rem;
-            opacity: 0.95;
-            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--slate-500);
+            line-height: 1.6;
+            max-width: 540px;
+            margin: 0 auto 1.5rem;
         }
 
         .beta-badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.4rem 1rem;
+            background: var(--teal-50);
+            color: var(--teal-600);
+            padding: 0.35rem 0.9rem;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            backdrop-filter: blur(10px);
+            letter-spacing: 0.04em;
+            border: 1px solid rgba(20, 184, 166, 0.2);
         }
 
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: #14b8a6;
-        }
-
-        .card p {
-            line-height: 1.8;
-            color: #4a5568;
-            margin-bottom: 1rem;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .feature {
-            background: #f7fafc;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .feature h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #2d3748;
-        }
-
-        .feature p {
-            font-size: 0.9rem;
-            color: #718096;
-            margin: 0;
-        }
-
-        .cta-buttons {
+        .hero-cta {
             display: flex;
-            gap: 1rem;
+            gap: 0.85rem;
             justify-content: center;
-            margin: 2rem 0;
+            margin-top: 2rem;
             flex-wrap: wrap;
         }
 
-        .btn {
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
+        /* ── Section container ── */
+        .section {
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ── Board Preview ── */
+        .preview-section {
+            margin: 3rem auto;
+            max-width: 1060px;
+            padding: 0 2rem;
+        }
+
+        .preview-card {
+            background: var(--slate-100);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-label {
+            font-size: 0.8rem;
             font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 1rem;
         }
 
-        .btn-primary {
-            background: #14b8a6;
-            color: white;
-            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+        .preview-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
         }
 
-        .btn-primary:hover {
-            background: #0d9488;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5);
+        .preview-col {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 0.85rem;
+            min-height: 120px;
         }
 
-        .btn-secondary {
-            background: white;
-            color: #14b8a6;
-            border: 2px solid #14b8a6;
+        .preview-col-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--slate-500);
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--slate-100);
         }
 
-        .btn-secondary:hover {
-            background: #f7fafc;
-            transform: translateY(-2px);
+        .preview-task {
+            background: var(--slate-100);
+            border-radius: 6px;
+            padding: 0.5rem 0.65rem;
+            margin-bottom: 0.45rem;
+            font-size: 0.75rem;
+            color: var(--slate-700);
+            border-left: 3px solid var(--teal-400);
+        }
+
+        .preview-task.priority-high {
+            border-left-color: #f59e0b;
+        }
+
+        .preview-task.priority-urgent {
+            border-left-color: #ef4444;
+        }
+
+        /* ── Features ── */
+        .features-section {
+            margin: 3.5rem auto;
+            max-width: 1060px;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+            color: var(--slate-900);
+        }
+
+        .section-subtitle {
+            color: var(--slate-500);
+            margin-bottom: 1.75rem;
+            font-size: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--teal-400);
+            box-shadow: 0 2px 12px rgba(20, 184, 166, 0.08);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.7rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            color: var(--slate-900);
+        }
+
+        .feature-card p {
+            font-size: 0.88rem;
+            color: var(--slate-500);
+            line-height: 1.55;
+        }
+
+        /* ── FAQ ── */
+        .faq-section {
+            margin: 3.5rem auto;
+            max-width: 760px;
+            padding: 0 2rem;
         }
 
         .faq-item {
-            margin: 1.5rem 0;
-            padding: 1.5rem;
-            background: #f7fafc;
-            border-radius: 12px;
-            border-left: 4px solid #14b8a6;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--slate-100);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
         }
 
         .faq-item h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--slate-900);
         }
 
         .faq-item p {
-            color: #718096;
-            margin: 0;
+            font-size: 0.92rem;
+            color: var(--slate-500);
+            line-height: 1.6;
+        }
+
+        /* ── Disclaimer ── */
+        .disclaimer-section {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         .disclaimer {
-            background: #fff5f5;
-            border: 2px solid #fc8181;
+            background: var(--red-50);
+            border: 1px solid var(--red-200);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem 0;
+            padding: 1.25rem 1.5rem;
         }
 
         .disclaimer h3 {
-            color: #c53030;
+            color: var(--red-700);
+            font-size: 0.95rem;
             margin-bottom: 0.5rem;
         }
 
         .disclaimer p {
-            color: #742a2a;
-            font-size: 0.9rem;
-            margin: 0.5rem 0;
+            color: var(--red-900);
+            font-size: 0.82rem;
+            line-height: 1.65;
+            margin: 0.25rem 0;
         }
 
+        .disclaimer .disclaimer-note {
+            margin-top: 0.6rem;
+            font-weight: 600;
+            color: var(--teal-600);
+        }
+
+        /* ── Footer ── */
         footer {
             text-align: center;
-            color: white;
-            padding: 2rem 0;
-            opacity: 0.9;
+            padding: 2.5rem 2rem;
+            color: var(--slate-500);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--slate-100);
+            margin-top: 2rem;
+            max-width: 1060px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
+        footer span {
+            color: var(--teal-500);
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero .tagline {
-                font-size: 1.1rem;
-            }
+            .hero { padding: 2.5rem 1.5rem 1.5rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero .tagline { font-size: 1.05rem; }
 
-            .features {
-                grid-template-columns: 1fr;
-            }
+            .features-grid { grid-template-columns: 1fr; }
 
-            .cta-buttons {
-                flex-direction: column;
-            }
+            .preview-columns { grid-template-columns: repeat(2, 1fr); }
+
+            .hero-cta { flex-direction: column; align-items: center; }
+            .hero-cta .btn { width: 100%; max-width: 300px; justify-content: center; }
+
+            .navbar-actions { gap: 0.5rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.88rem; }
+        }
+
+        @media (max-width: 480px) {
+            .preview-columns { grid-template-columns: 1fr 1fr; }
+            .navbar-name { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="hero">
-            <div class="logo">🚀</div>
-            <h1>Unblocked</h1>
-            <p class="tagline">Visual project management that just works</p>
-            <span class="beta-badge">⚡ BETA</span>
+
+    <!-- ── Navbar with logo + CTA buttons ── -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <img src="icon.png" alt="Unblocked" class="navbar-logo">
+            <span class="navbar-name">Unblocked</span>
+        </a>
+        <div class="navbar-actions">
+            <a href="app.html?demo=true" class="btn btn-outline">Demo</a>
+            <a href="app.html?new=true" class="btn btn-primary">+ New Board</a>
         </div>
+    </nav>
 
-        <div class="card">
-            <h2>Welcome to Unblocked!</h2>
-            <p>
-                Unblocked is a beautiful, real-time kanban board that helps you organize your projects, 
-                track progress, and get things done. Whether you're managing personal tasks or collaborating 
-                with a team, Unblocked keeps everything visual and simple.
-            </p>
-            <p>
-                <strong>Currently in Beta:</strong> We're actively improving Unblocked based on user feedback. 
-                Your experience helps us build a better product!
-            </p>
+    <!-- ── Hero ── -->
+    <div class="hero">
+        <img src="icon.png" alt="Unblocked logo" class="hero-logo">
+        <span class="beta-badge">BETA</span>
+        <h1>Get <span>Unblocked.</span><br>See your work move forward.</h1>
+        <p class="tagline">
+            A clean, real-time kanban board that helps you organize projects, 
+            track progress, and ship faster — from any device.
+        </p>
+        <div class="hero-cta">
+            <a href="app.html?demo=true" class="btn btn-primary btn-large">Try the Demo</a>
+            <a href="app.html?new=true" class="btn btn-outline btn-large">+ Create New Board</a>
         </div>
-
-        <div class="card">
-            <h2>✨ Key Features</h2>
-            <div class="features">
-                <div class="feature">
-                    <h3>🎯 Drag & Drop</h3>
-                    <p>Intuitive card movement across columns - move tasks as your work progresses</p>
-                </div>
-                <div class="feature">
-                    <h3>🔄 Real-Time Sync</h3>
-                    <p>Changes sync instantly across all your devices using Firebase</p>
-                </div>
-                <div class="feature">
-                    <h3>📱 Works Everywhere</h3>
-                    <p>Desktop, tablet, phone - access your boards from any device</p>
-                </div>
-                <div class="feature">
-                    <h3>🏷️ Rich Metadata</h3>
-                    <p>Projects, priorities, effort estimates, due dates, and custom labels</p>
-                </div>
-                <div class="feature">
-                    <h3>🌙 Dark Mode</h3>
-                    <p>Easy on the eyes with built-in dark mode support</p>
-                </div>
-                <div class="feature">
-                    <h3>📦 Archive & Search</h3>
-                    <p>Keep completed work organized and easily find what you need</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="cta-buttons">
-            <a href="app.html?demo=true" class="btn btn-primary">🚀 Try Demo Board</a>
-            <a href="app.html?new=true" class="btn btn-secondary">➕ Create New Board</a>
-        </div>
-
-        <div class="card">
-            <h2>❓ Frequently Asked Questions</h2>
-            
-            <div class="faq-item">
-                <h3>Is Unblocked free to use?</h3>
-                <p>During beta, Unblocked is completely free! We're gathering feedback to build the best product possible. Pricing for the full release will be announced later.</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>How does data sync work?</h3>
-                <p>Unblocked uses Firebase for real-time synchronization. Your data is stored in the cloud and syncs automatically across all your devices. Changes appear instantly!</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>Can I use Unblocked offline?</h3>
-                <p>Basic functionality works offline using local storage. Your changes will sync to Firebase once you're back online.</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>Is my data private and secure?</h3>
-                <p>Currently in beta testing mode, data is stored in Firebase with test-mode security rules. Full authentication and private boards are coming in the next release!</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>Can I collaborate with others?</h3>
-                <p>Board sharing and collaboration features are in development! For now, anyone with the board URL can view and edit cards (beta testing mode).</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>How do I add Unblocked to my iPhone/iPad?</h3>
-                <p>Open this site in Safari, tap the Share button, then "Add to Home Screen". It will work like a native app!</p>
-            </div>
-
-            <div class="faq-item">
-                <h3>Can I export my data?</h3>
-                <p>Yes! Use the Export button in the board to download all your cards as a JSON file. Import functionality lets you restore or share boards.</p>
-            </div>
-        </div>
-
-        <div class="disclaimer">
-            <h3>⚠️ Beta Testing Disclaimer</h3>
-            <p><strong>Important Information:</strong></p>
-            <p>• Unblocked is currently in BETA and provided "as-is" for testing purposes only</p>
-            <p>• Data security is in test mode - do not store sensitive or confidential information</p>
-            <p>• Features may change, and data could be reset during beta testing</p>
-            <p>• We recommend exporting your boards regularly as backup</p>
-            <p>• By using Unblocked, you acknowledge this is pre-release software and accept these limitations</p>
-            <p>• No warranty or guarantee of data persistence is provided during beta</p>
-            <p><strong>Full security and authentication features coming in v1.0 release!</strong></p>
-        </div>
-
-        <footer>
-            <p>Made with ❤️ by MJ | Unblocked Beta v0.9</p>
-            <p style="font-size: 0.9rem; margin-top: 0.5rem;">© 2026 Unblocked. All rights reserved.</p>
-        </footer>
     </div>
+
+    <!-- ── Board Preview ── -->
+    <div class="preview-section">
+        <div class="preview-card">
+            <div class="preview-label">What your board looks like</div>
+            <div class="preview-columns">
+                <div class="preview-col">
+                    <div class="preview-col-title">Ideas</div>
+                    <div class="preview-task">Research competitors</div>
+                    <div class="preview-task priority-high">Design landing page</div>
+                </div>
+                <div class="preview-col">
+                    <div class="preview-col-title">In Progress</div>
+                    <div class="preview-task priority-urgent">Launch campaign</div>
+                    <div class="preview-task">Write API docs</div>
+                </div>
+                <div class="preview-col">
+                    <div class="preview-col-title">Review</div>
+                    <div class="preview-task">User feedback survey</div>
+                </div>
+                <div class="preview-col">
+                    <div class="preview-col-title">Done</div>
+                    <div class="preview-task">Setup Firebase</div>
+                    <div class="preview-task">Create icon assets</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Features ── -->
+    <div class="features-section">
+        <h2 class="section-title">Built for how you actually work</h2>
+        <p class="section-subtitle">Everything you need, nothing you don't.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <h3>Drag & Drop</h3>
+                <p>Move cards between columns as your work progresses. Intuitive and instant.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔄</span>
+                <h3>Real-Time Sync</h3>
+                <p>Powered by Firebase. Changes appear instantly across every device you use.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📱</span>
+                <h3>Works Everywhere</h3>
+                <p>Desktop, tablet, or phone — add it to your home screen and use it like a native app.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🏷️</span>
+                <h3>Rich Metadata</h3>
+                <p>Priority levels, effort estimates, due dates, project tags, and custom labels on every card.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🌙</span>
+                <h3>Dark Mode</h3>
+                <p>Toggle between light and dark themes. Easy on your eyes during late-night sessions.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📦</span>
+                <h3>Archive & Export</h3>
+                <p>Archive completed work to keep boards clean. Export data as JSON anytime.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FAQ ── -->
+    <div class="faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Quick answers to common questions.</p>
+
+        <div class="faq-item">
+            <h3>Is Unblocked free?</h3>
+            <p>Yes — completely free during beta. We're focused on building the best experience possible based on your feedback. Pricing for the full release will be announced later.</p>
+        </div>
+        <div class="faq-item">
+            <h3>How does data sync work?</h3>
+            <p>Your boards are stored in Firebase and sync automatically in real time. Open Unblocked on your laptop, make a change, and see it update on your phone instantly.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Does it work offline?</h3>
+            <p>Yes. Core features work offline via local storage. When you reconnect, your changes sync back to Firebase automatically.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Is my data secure?</h3>
+            <p>During beta, Firebase runs in test mode for easier access. Full authentication, private boards, and encrypted storage are coming in v1.0. Avoid storing sensitive information for now.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Can I collaborate with others?</h3>
+            <p>Collaboration is in development. Currently, anyone with a board URL can view and edit cards — great for testing, with proper access controls coming soon.</p>
+        </div>
+        <div class="faq-item">
+            <h3>How do I install it on iPhone or iPad?</h3>
+            <p>Open this page in Safari, tap the Share icon, then choose "Add to Home Screen." It will look and feel like a native app.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Can I export my data?</h3>
+            <p>Absolutely. Hit the Export button on any board to download your cards as JSON. You can also import boards to restore or share them.</p>
+        </div>
+    </div>
+
+    <!-- ── Disclaimer ── -->
+    <div class="disclaimer-section">
+        <div class="disclaimer">
+            <h3>⚠️ Beta Disclaimer</h3>
+            <p>Unblocked is currently in beta and provided as-is for testing purposes. Data security is in test mode — please do not store sensitive or confidential information. Features may change and data may be reset during the beta period. We recommend exporting your boards regularly as a backup. No warranty or guarantee of data persistence is provided.</p>
+            <p class="disclaimer-note">Full security and user authentication are coming in v1.0.</p>
+        </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer>
+        <p>Made with <span>♥</span> by MJ &nbsp;·&nbsp; Unblocked Beta v0.9</p>
+        <p style="margin-top: 0.35rem;">© 2026 Unblocked. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
