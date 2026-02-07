@@ -24,11 +24,11 @@ let boardConfig = {
 
 // Default projects (used for new boards or migration)
 const DEFAULT_PROJECTS = [
-    { id: 'earnings-digest', name: 'Earnings Digest', emoji: '📊', color: '#667eea', order: 0, archived: false },
-    { id: 'relocation-helper', name: 'Relocation Helper', emoji: '🌍', color: '#ed8936', order: 1, archived: false },
-    { id: 'photo-journey', name: 'PhotoJourney AI', emoji: '📸', color: '#9f7aea', order: 2, archived: false },
-    { id: 'unblocked', name: 'Unblocked', emoji: '🚀', color: '#48bb78', order: 3, archived: false },
-    { id: 'other', name: 'Other', emoji: '💡', color: '#a0aec0', order: 4, archived: false }
+    { id: 'project-1', name: 'Project 1', emoji: '📊', color: '#667eea', order: 0, archived: false },
+    { id: 'project-2', name: 'Project 2', emoji: '🌍', color: '#ed8936', order: 1, archived: false },
+    { id: 'project-3', name: 'Project 3', emoji: '📸', color: '#9f7aea', order: 2, archived: false },
+    { id: 'project-4', name: 'Project 4', emoji: '🚀', color: '#48bb78', order: 3, archived: false },
+    { id: 'project-5', name: 'Project 5', emoji: '💡', color: '#a0aec0', order: 4, archived: false }
 ];
 
 // Curated emoji set for the picker
@@ -66,6 +66,9 @@ function waitForFirebase() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    // Set title immediately from boardConfig (no flash of wrong title)
+    updateBoardTitle();
+    
     await waitForFirebase();
     
     // Show demo banner if in demo mode
